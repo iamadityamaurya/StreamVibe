@@ -14,13 +14,14 @@ import { Colors, Radius, Typography } from '../../constants/theme';
 import { VideoPlayerProps } from '../../types/video';
 import { formatDuration } from '../../utils/formatters';
 import { usePlayerState } from '../../hooks/usePlayerState';
+import { useGlobalPlayer } from '../../context/PlayerContext';
 
 export function VideoPlayer({
   videoUrl,
   thumbnailUrl,
   autoPlay = true,
   isLooping = false,
-  muted = true,
+  muted = false,
   isActive = true,
   showControls = true,
   onPlaybackStatusUpdate,
@@ -31,13 +32,15 @@ export function VideoPlayer({
 }: VideoPlayerProps) {
   const { playerState, setIsPlaying, setProgress, setIsBuffering, setIsMuted, setError } =
     usePlayerState();
+  const globalPlayer = useGlobalPlayer();
+  const effectiveMuted = globalPlayer ? globalPlayer.isGlobalMuted : muted;
 
   const [controlsVisible, setControlsVisible] = useState(showControls);
 
   // Initialize expo-video player instance
   const player = useVideoPlayer(videoUrl, (p) => {
     p.loop = isLooping;
-    p.muted = muted;
+    p.muted = effectiveMuted;
   });
 
   // Ensure playback starts after VideoView DOM element mounts
@@ -122,10 +125,10 @@ export function VideoPlayer({
   // Sync mute setting
   useEffect(() => {
     if (player) {
-      player.muted = muted;
-      setIsMuted(muted);
+      player.muted = effectiveMuted;
+      setIsMuted(effectiveMuted);
     }
-  }, [muted, player, setIsMuted]);
+  }, [effectiveMuted, player, setIsMuted]);
 
   // Register expo-video event listeners
   useEffect(() => {
@@ -214,11 +217,14 @@ export function VideoPlayer({
   }, [player, playerState.isPlaying, setError]);
 
   const handleToggleMute = useCallback(() => {
-    if (!player) return;
-    const newMutedState = !player.muted;
-    player.muted = newMutedState;
-    setIsMuted(newMutedState);
-  }, [player, setIsMuted]);
+    if (globalPlayer) {
+      globalPlayer.toggleGlobalMute();
+    } else if (player) {
+      const newMutedState = !player.muted;
+      player.muted = newMutedState;
+      setIsMuted(newMutedState);
+    }
+  }, [globalPlayer, player, setIsMuted]);
 
   const handleRetry = useCallback(() => {
     if (!player) return;

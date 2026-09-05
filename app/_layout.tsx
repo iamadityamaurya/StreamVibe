@@ -5,28 +5,34 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native';
 import 'react-native-reanimated';
 
+import { PlayerProvider } from '../src/context/PlayerContext';
+import { MiniPlayerOverlay } from '../src/components/player/MiniPlayerOverlay';
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
-        <Stack screenOptions={{ headerShown: false, animation: 'default' }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen
-            name="watch/[id]"
-            options={{
-              presentation: 'card',
-              animation: 'slide_from_bottom',
-            }}
-          />
-          <Stack.Screen
-            name="shorts/[id]"
-            options={{
-              presentation: 'fullScreenModal',
-              animation: 'fade',
-            }}
-          />
-        </Stack>
-        <StatusBar style="light" />
+        <PlayerProvider>
+          <Stack screenOptions={{ headerShown: false, animation: 'default' }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen
+              name="watch/[id]"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'none',
+              }}
+            />
+            <Stack.Screen
+              name="shorts/[id]"
+              options={{
+                presentation: 'fullScreenModal',
+                animation: 'fade',
+              }}
+            />
+          </Stack>
+          <MiniPlayerOverlay />
+          <StatusBar style="light" />
+        </PlayerProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

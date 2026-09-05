@@ -6,11 +6,14 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Short } from '../../types/video';
 import { Colors, Spacing, Radius, Typography } from '../../constants/theme';
 import { formatLikes } from '../../utils/formatters';
 import { VideoPlayer } from '../player/VideoPlayer';
+
+import { useGlobalPlayer } from '../../context/PlayerContext';
 
 interface ShortItemProps {
   short: Short;
@@ -30,11 +33,13 @@ export const ShortItem = memo(
     width,
     onPressBack,
   }: ShortItemProps) {
+    const insets = useSafeAreaInsets();
+    const globalPlayer = useGlobalPlayer();
+    const isMuted = globalPlayer ? globalPlayer.isGlobalMuted : false;
     const [isLiked, setIsLiked] = useState(false);
     const [isDisliked, setIsDisliked] = useState(false);
     const [likeCount, setLikeCount] = useState(short.likes);
     const [isSubscribed, setIsSubscribed] = useState(false);
-    const [isMuted, setIsMuted] = useState(true);
 
     useEffect(() => {
       console.log('[ShortItem] Active state updated:', {
@@ -74,8 +79,10 @@ export const ShortItem = memo(
     }, []);
 
     const handleToggleMute = useCallback(() => {
-      setIsMuted((prev) => !prev);
-    }, []);
+      if (globalPlayer) {
+        globalPlayer.toggleGlobalMute();
+      }
+    }, [globalPlayer]);
 
     return (
       <View style={[styles.container, { width, height }]}>
@@ -106,7 +113,7 @@ export const ShortItem = memo(
 
         {/* Top Header Overlay with Back button */}
         {onPressBack && (
-          <View style={styles.topHeader}>
+          <View style={[styles.topHeader, { top: Math.max(insets.top + 8, 36) }]}>
             <TouchableOpacity
               style={styles.headerBtn}
               onPress={onPressBack}

@@ -8,7 +8,7 @@ import {
   ScrollView,
   StatusBar,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '../constants/theme';
@@ -17,13 +17,21 @@ import { formatLikes, formatViews } from '../utils/formatters';
 
 import { VideoPlayer } from '../components/player/VideoPlayer';
 
+import { useGlobalPlayer } from '../context/PlayerContext';
+
 interface WatchScreenProps {
   videoId: string;
 }
 
 export function WatchScreen({ videoId }: WatchScreenProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { playVideo } = useGlobalPlayer();
   const video = MOCK_VIDEOS.find((v) => v.id === videoId) || MOCK_VIDEOS[0];
+
+  React.useEffect(() => {
+    playVideo(video);
+  }, [video, playVideo]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -39,7 +47,7 @@ export function WatchScreen({ videoId }: WatchScreenProps) {
           style={styles.player}
         />
         <TouchableOpacity
-          style={styles.backButtonOverlay}
+          style={[styles.backButtonOverlay, { top: Math.max(insets.top + 8, 12) }]}
           onPress={() => router.back()}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >

@@ -18,9 +18,11 @@ import { MOCK_VIDEOS } from '../data/mockVideos';
 import { MOCK_SHORTS } from '../data/mockShorts';
 import { Video } from '../types/video';
 import { formatDuration, formatViews } from '../utils/formatters';
+import { useGlobalPlayer } from '../context/PlayerContext';
 
 export function HomeScreen() {
   const router = useRouter();
+  const { playVideo } = useGlobalPlayer();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const filteredVideos = selectedCategory === 'all'
@@ -28,11 +30,8 @@ export function HomeScreen() {
     : MOCK_VIDEOS.filter((v) => v.categoryId === selectedCategory);
 
   const handlePressVideo = useCallback((video: Video) => {
-    router.push({
-      pathname: '/watch/[id]',
-      params: { id: video.id },
-    });
-  }, [router]);
+    playVideo(video);
+  }, [playVideo]);
 
   const handlePressShort = useCallback((shortId: string) => {
     router.push({
