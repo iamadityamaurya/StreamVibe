@@ -15,6 +15,8 @@ import { Colors, Spacing, Radius, Typography } from '../constants/theme';
 import { MOCK_VIDEOS } from '../data/mockVideos';
 import { formatLikes, formatViews } from '../utils/formatters';
 
+import { VideoPlayer } from '../components/player/VideoPlayer';
+
 interface WatchScreenProps {
   videoId: string;
 }
@@ -27,9 +29,15 @@ export function WatchScreen({ videoId }: WatchScreenProps) {
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
-      {/* Video Viewport Area (Player placeholder for Phase 1) */}
+      {/* Video Viewport Area with VideoPlayer */}
       <View style={styles.playerContainer}>
-        <Image source={{ uri: video.thumbnailUrl }} style={styles.playerThumbnail} />
+        <VideoPlayer
+          videoUrl={video.videoUrl}
+          thumbnailUrl={video.thumbnailUrl}
+          autoPlay={true}
+          showControls={true}
+          style={styles.player}
+        />
         <TouchableOpacity
           style={styles.backButtonOverlay}
           onPress={() => router.back()}
@@ -37,10 +45,6 @@ export function WatchScreen({ videoId }: WatchScreenProps) {
         >
           <Ionicons name="chevron-down" size={28} color="#FFFFFF" />
         </TouchableOpacity>
-
-        <View style={styles.playButtonOverlay}>
-          <Ionicons name="play" size={40} color="#FFFFFF" />
-        </View>
       </View>
 
       {/* Video Details & Interaction Area */}
@@ -128,14 +132,10 @@ const styles = StyleSheet.create({
     height: 230,
     backgroundColor: '#000000',
     position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  playerThumbnail: {
-    ...StyleSheet.absoluteFillObject,
+  player: {
     width: '100%',
     height: '100%',
-    opacity: 0.85,
   },
   backButtonOverlay: {
     position: 'absolute',
@@ -147,16 +147,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 10,
-  },
-  playButtonOverlay: {
-    width: 60,
-    height: 60,
-    borderRadius: Radius.full,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingLeft: 4,
+    zIndex: 30,
   },
   contentContainer: {
     padding: Spacing.lg,
