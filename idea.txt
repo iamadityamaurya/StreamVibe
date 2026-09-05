@@ -1,0 +1,1072 @@
+You are a senior React Native engineer responsible for building a polished, production-quality React Native application for a technical hiring assignment.
+
+IMPORTANT:
+Build this application incrementally in clearly separated phases.
+
+Do NOT try to implement everything at once.
+
+After completing each phase:
+1. Verify that the application still runs.
+2. Check that existing functionality has not been broken.
+3. Fix any issues before continuing.
+4. Keep the code clean and maintainable.
+5. Do not rewrite working functionality unnecessarily.
+6. Do not move to the next phase until the current phase is stable.
+
+The goal is NOT to build a huge application.
+
+The goal is to build a smaller, polished, smooth and reliable video-first mobile experience that demonstrates strong React Native engineering.
+
+============================================================
+ASSIGNMENT OVERVIEW
+============================================================
+
+Build a video-first React Native mobile application with:
+
+- Home video feed
+- 15–20 mock videos
+- Horizontal categories
+- Shorts preview section
+- Full-screen vertical Shorts viewer
+- Working video playback
+- Correct video lifecycle management
+- Shared-element-style Home → Watch transition
+- Gesture-driven Watch → Mini Player interaction
+- Mini-player restoration
+- Smooth scrolling
+- Smooth animations
+- Clean TypeScript architecture
+- Good performance
+- Loading and error states
+
+The most important evaluation areas are:
+
+1. Smoothness
+2. Gestures and animations
+3. Video lifecycle
+4. Architecture
+5. UI polish
+
+Performance, reliability and interaction quality are more important than decorative UI.
+
+============================================================
+TECHNOLOGY
+============================================================
+
+Use:
+
+- React Native
+- TypeScript
+- Expo where practical
+- Expo Router or React Navigation
+- FlashList or FlatList
+- React Native Reanimated
+- React Native Gesture Handler
+- expo-video or another stable modern React Native video solution
+
+Use current stable APIs.
+
+Keep dependencies minimal.
+
+Do not add a backend unless genuinely necessary.
+
+Mock data is acceptable.
+
+============================================================
+PHASE 1 — PROJECT FOUNDATION
+============================================================
+
+Goal:
+
+Create a clean React Native + TypeScript foundation.
+
+Tasks:
+
+- Initialize the project.
+- Configure TypeScript.
+- Configure navigation.
+- Create the basic application structure.
+- Create Home screen.
+- Create Watch screen.
+- Create Shorts screen.
+- Create basic theme/constants.
+- Create TypeScript models.
+- Create mock data files.
+
+Suggested structure:
+
+src/
+├── components/
+├── screens/
+├── navigation/
+├── hooks/
+├── store/
+├── data/
+├── types/
+├── utils/
+└── constants/
+
+Create types such as:
+
+Video
+Short
+Category
+PlayerState
+
+Example Video:
+
+{
+  id: string,
+  title: string,
+  creatorName: string,
+  creatorAvatar: string,
+  thumbnailUrl: string,
+  videoUrl: string,
+  duration: number,
+  views: number,
+  uploadedAt: string
+}
+
+Create enough mock data for 15–20 regular videos and several Shorts.
+
+At the end of Phase 1:
+
+- App launches successfully.
+- Navigation works.
+- Home → Watch works.
+- Home → Shorts works.
+- No major warnings/errors.
+- Project structure is clean.
+
+Do NOT implement advanced animations or video lifecycle yet.
+
+============================================================
+PHASE 2 — HOME SCREEN
+============================================================
+
+Goal:
+
+Build the complete Home screen.
+
+Implement:
+
+HEADER
+------
+
+Create:
+
+- Placeholder branding/logo
+- Search button
+- Notification button
+- Profile/avatar
+
+CATEGORY ROW
+------------
+
+Create a horizontally scrollable category row.
+
+Example:
+
+All | Music | Gaming | Tech | Education | News | Sports
+
+Requirements:
+
+- Horizontal scrolling
+- Selected state
+- Proper touch feedback
+- Good spacing
+- No unnecessary screen-wide re-renders
+
+VIDEO FEED
+----------
+
+Create a vertical feed containing at least 15–20 videos.
+
+Each card must contain:
+
+- Thumbnail
+- Duration
+- Creator avatar
+- Title
+- Creator/channel name
+- View count
+- Upload time
+- Options action
+
+Use FlashList or FlatList.
+
+Do NOT use Array.map() to render the main feed.
+
+Use:
+
+- Stable keys
+- React.memo where appropriate
+- Stable callbacks
+- Sensible component boundaries
+
+Example:
+
+VideoCard
+├── Thumbnail
+├── DurationBadge
+├── Avatar
+├── Title
+├── Creator
+├── Metadata
+└── OptionsButton
+
+At the end of Phase 2:
+
+- Home looks polished.
+- 15–20 videos are visible through scrolling.
+- Categories work.
+- Feed scrolls smoothly.
+- No video autoplay is required yet.
+- Existing navigation still works.
+
+============================================================
+PHASE 3 — VIDEO INFRASTRUCTURE
+============================================================
+
+Goal:
+
+Before building Shorts, create a reliable video system.
+
+Create reusable video components and hooks.
+
+For example:
+
+VideoPlayer
+useVideoLifecycle
+usePlayerState
+
+Create a sensible player state model.
+
+Example:
+
+type PlayerState = {
+  videoId: string | null;
+  isPlaying: boolean;
+  isMiniPlayer: boolean;
+  progress: number;
+  duration: number;
+};
+
+Do not make every piece of state global.
+
+Only state that genuinely needs to be shared should be global.
+
+Implement:
+
+- Video loading
+- Play
+- Pause
+- Error handling
+- Cleanup
+- Playback state tracking
+
+Handle playback errors gracefully.
+
+Example:
+
+Unable to play video
+Tap to retry
+
+At the end of Phase 3:
+
+- A reusable video player works.
+- A video can play and pause.
+- Failed videos do not crash the application.
+- Player resources are cleaned up correctly.
+
+============================================================
+PHASE 4 — SHORTS EXPERIENCE
+============================================================
+
+Goal:
+
+Build the complete Shorts experience.
+
+PART A — HOME SHORTS SECTION
+----------------------------
+
+Add a Shorts section to Home.
+
+Example:
+
+Shorts
+
+[Short] [Short] [Short] [Short] [Short]
+
+Each preview should be visually distinct from normal video cards.
+
+Tapping a Short opens the full-screen Shorts viewer.
+
+PART B — FULL-SCREEN SHORTS
+---------------------------
+
+Create a full-screen vertical viewer.
+
+Requirements:
+
+- Full-screen video
+- Vertical paging
+- Swipe up → next Short
+- Swipe down → previous Short
+- Smooth paging
+- Current Short automatically plays
+
+Use an efficient virtualized approach where appropriate.
+
+At the end of Phase 4:
+
+- Shorts preview works.
+- Full-screen Shorts works.
+- Vertical swiping works.
+- Current Short can play.
+- Back navigation works.
+
+Do not optimize advanced preloading yet if it complicates the implementation. That will be handled in the next phase.
+
+============================================================
+PHASE 5 — VIDEO LIFECYCLE + SHORTS PERFORMANCE
+============================================================
+
+Goal:
+
+Make Shorts reliable under rapid interaction.
+
+This is a critical phase.
+
+Implement a strict active-video strategy.
+
+RULE:
+
+Only the currently visible Short should actively play.
+
+When the active index changes:
+
+Previous:
+    pause
+
+Current:
+    play
+
+Next:
+    optionally prepare/preload
+
+Far-away Shorts:
+    remain inactive
+
+Do NOT preload every Short.
+
+Prevent:
+
+- Multiple videos playing simultaneously
+- Overlapping audio
+- Frozen players
+- Stale player references
+- Playback leaks
+- Unnecessary mounted players
+- Excessive memory/resource consumption
+
+Rapid swipe test:
+
+Short 1
+↓
+Short 2
+↓
+Short 3
+↓
+Short 4
+↓
+Short 5
+
+After the final swipe:
+
+Only Short 5 should be actively playing.
+
+Also test:
+
+Enter Shorts
+→ swipe rapidly
+→ exit
+→ re-enter
+→ swipe again
+
+The app must remain stable.
+
+Use Reanimated/Gesture Handler appropriately.
+
+Avoid unnecessary JS-thread work during gestures.
+
+At the end of Phase 5:
+
+- Only the visible Short plays.
+- Off-screen videos pause.
+- Rapid swiping does not create overlapping audio.
+- Re-entering Shorts works correctly.
+- Video resources are cleaned up.
+
+============================================================
+PHASE 6 — WATCH SCREEN
+============================================================
+
+Goal:
+
+Build the normal video watch/detail screen.
+
+When a normal Home video is tapped:
+
+Home
+↓
+Watch
+
+Watch screen should contain:
+
+- Video player
+- Title
+- Creator
+- Views
+- Upload time
+- Description/details
+- Additional content
+- Related/mock videos if useful
+
+The page should be scrollable.
+
+The player must remain functional while interacting with the page.
+
+Implement sensible playback state handling.
+
+Test:
+
+Home
+→ Video A
+→ Watch
+→ Back
+→ Home
+→ Video B
+→ Watch
+→ Back
+
+Repeat this multiple times.
+
+At the end of Phase 6:
+
+- Watch screen works.
+- Video plays.
+- Details scroll.
+- Navigation is reliable.
+- Repeated opening/closing does not break player state.
+
+============================================================
+PHASE 7 — SHARED-ELEMENT-STYLE TRANSITION
+============================================================
+
+Goal:
+
+Implement the core Home → Watch visual transition.
+
+IMPORTANT:
+
+Do NOT use a simple abrupt navigation transition.
+
+The selected Home video thumbnail should visually transform/expand into the Watch player.
+
+Desired behavior:
+
+Home:
+
+┌──────────────────────┐
+│                      │
+│      THUMBNAIL       │
+│                      │
+└──────────────────────┘
+
+          ↓
+       EXPANDS
+          ↓
+
+┌──────────────────────┐
+│                      │
+│        VIDEO         │
+│                      │
+└──────────────────────┘
+
+The selected thumbnail should feel like it becomes the Watch player.
+
+Use:
+
+- Reanimated
+- Shared values
+- Layout animations
+- Gesture Handler where appropriate
+
+You may use a shared-element library if it is stable and appropriate, but do not add a library just for the sake of it.
+
+Focus on visual continuity.
+
+Avoid:
+
+- Abrupt navigation
+- Flashing
+- Sudden layout jumps
+- Incorrect thumbnail positioning
+- Black/white flashes
+- Player appearing disconnected from the tapped card
+
+Also make returning to Home feel visually connected to the original item where practical.
+
+At the end of Phase 7:
+
+- Home → Watch transition feels continuous.
+- Repeated transitions remain stable.
+- No obvious visual glitches occur.
+
+============================================================
+PHASE 8 — GESTURE-DRIVEN MINI PLAYER
+============================================================
+
+Goal:
+
+Implement the gesture-driven Watch → Mini Player interaction.
+
+This is another core requirement.
+
+The user must be able to drag the Watch screen downward.
+
+The movement must follow the finger in real time.
+
+IMPORTANT:
+
+Do NOT implement:
+
+drag
+→ release
+→ animation starts
+
+Instead:
+
+finger moves
+→ player moves simultaneously
+
+Use:
+
+- React Native Gesture Handler
+- Reanimated shared values
+- UI-thread animations/worklets where appropriate
+
+Example:
+
+FULL SCREEN
+
+┌──────────────────────┐
+│                      │
+│        VIDEO         │
+│                      │
+│                      │
+│       DETAILS        │
+│                      │
+└──────────────────────┘
+
+User drags downward:
+
+┌──────────────────────┐
+│                      │
+│                      │
+│                      │
+│   ┌──────────────┐   │
+│   │ MINI PLAYER  │   │
+│   └──────────────┘   │
+└──────────────────────┘
+
+The player should track translation based on finger movement.
+
+Implement:
+
+- Drag gesture
+- Translation
+- Scale if appropriate
+- Opacity if appropriate
+- Threshold
+- Snap/minimize behavior
+- Restoration behavior
+
+============================================================
+PHASE 9 — MINI PLAYER
+============================================================
+
+Goal:
+
+Make the minimized player functional.
+
+When the user drags beyond the threshold:
+
+Watch screen minimizes.
+
+A compact player appears near the bottom.
+
+Mini player should contain:
+
+- Video/player
+- Shortened title
+- Play/pause
+- Close/dismiss control if appropriate
+
+The active video should continue behaving correctly.
+
+Tapping the mini-player:
+
+Mini Player
+↓
+Full Watch Screen
+
+Restore with a smooth animation.
+
+The Watch → Mini Player → Watch flow must preserve sensible playback state.
+
+Test:
+
+Home
+→ Watch
+→ Drag
+→ Mini Player
+→ Tap
+→ Watch
+→ Back
+
+Also test:
+
+Home
+→ Watch
+→ Mini Player
+→ Home interaction
+→ Restore
+
+Handle all state transitions safely.
+
+============================================================
+PHASE 10 — GESTURE CONFLICT MANAGEMENT
+============================================================
+
+Goal:
+
+Make the gesture system feel intentional.
+
+The Watch screen can have:
+
+- Vertical scrolling
+- Video controls
+- Downward dismissal/minimization
+
+These gestures must not constantly fight each other.
+
+Implement sensible gesture priority/activation rules.
+
+For example:
+
+If the user is scrolling the Watch details:
+
+Normal scroll should occur.
+
+If the user intentionally starts dragging the player/watch container downward:
+
+Mini-player gesture should activate.
+
+Avoid accidental minimization.
+
+Test slow and fast gestures.
+
+Test starting the gesture from different areas.
+
+At the end of Phase 10:
+
+- Watch scrolling works.
+- Downward gesture works.
+- Gestures don't constantly conflict.
+- Mini-player behavior feels intentional.
+
+============================================================
+PHASE 11 — GLOBAL PERFORMANCE OPTIMIZATION
+============================================================
+
+Goal:
+
+Perform a complete performance pass.
+
+Review the entire application.
+
+HOME FEED
+---------
+
+Ensure:
+
+- FlashList/FlatList
+- Stable keys
+- Memoized cards
+- Stable callbacks
+- Minimal parent re-renders
+- No unnecessary state updates during scroll
+
+SHORTS
+------
+
+Ensure:
+
+- Only active video plays
+- Off-screen videos pause
+- Limited preloading
+- Proper cleanup
+- No overlapping audio
+- No unnecessary mounted players
+
+ANIMATIONS
+----------
+
+Use Reanimated for high-frequency animations.
+
+Avoid driving continuous gesture animations through normal React state.
+
+PLAYER
+------
+
+Make sure inactive players are cleaned up.
+
+IMAGES
+------
+
+Use efficient image loading/caching where supported.
+
+Avoid unnecessarily loading huge images.
+
+RENDERING
+---------
+
+Look for:
+
+- Unnecessary Context updates
+- Excessive state
+- Large component trees
+- Inline objects passed to memoized components
+- Inline callbacks where avoidable
+- Expensive calculations during scrolling
+
+Do not blindly add useMemo/useCallback everywhere.
+
+Use them where they actually improve stability/performance.
+
+============================================================
+PHASE 12 — UI POLISH
+============================================================
+
+Goal:
+
+Make the application look hiring-ready.
+
+Improve:
+
+- Typography
+- Spacing
+- Cards
+- Borders/radius
+- Icons
+- Touch feedback
+- Loading states
+- Error states
+- Empty states
+- Player controls
+- Mini-player appearance
+- Shorts controls
+- Category selection
+
+Keep the UI clean and modern.
+
+Do not copy YouTube or Instagram branding directly.
+
+Do not spend excessive time on decorative animations.
+
+Interaction quality is more important.
+
+============================================================
+PHASE 13 — RELIABILITY TESTING
+============================================================
+
+Perform aggressive manual testing.
+
+HOME:
+
+[ ] App launches
+[ ] Header works
+[ ] Categories scroll
+[ ] Category selection works
+[ ] 15–20 videos exist
+[ ] Video cards show all metadata
+[ ] Fast scrolling works
+[ ] No unwanted autoplay
+
+SHORTS:
+
+[ ] Shorts section exists
+[ ] Short opens
+[ ] Vertical swiping works
+[ ] Current Short plays
+[ ] Previous Short pauses
+[ ] Next Short behaves correctly
+[ ] Rapid swiping works
+[ ] No overlapping audio
+[ ] No playback leaks
+[ ] Exit works
+[ ] Re-enter works
+
+WATCH:
+
+[ ] Video opens
+[ ] Video plays
+[ ] Details scroll
+[ ] Playback state works
+[ ] Back works
+[ ] Repeated opening works
+
+TRANSITION:
+
+[ ] Thumbnail transforms into Watch player
+[ ] No abrupt screen change
+[ ] No flashing
+[ ] Returning Home works
+
+MINI PLAYER:
+
+[ ] Downward drag works
+[ ] Player follows finger
+[ ] Threshold works
+[ ] Mini player appears
+[ ] Video state is preserved
+[ ] Tap restores Watch
+[ ] Restore animation works
+[ ] Scrolling still works
+
+REPEATED FLOW:
+
+Home
+→ Watch
+→ Back
+→ Watch
+→ Back
+→ Shorts
+→ Rapid Swipe
+→ Home
+→ Watch
+→ Mini Player
+→ Restore
+→ Back
+→ Shorts
+→ Home
+
+Repeat the complete flow several times.
+
+Fix every stability issue found.
+
+============================================================
+PHASE 14 — CODE QUALITY REVIEW
+============================================================
+
+Before finishing, review the entire codebase.
+
+Check:
+
+- TypeScript correctness
+- No unnecessary any
+- No dead code
+- No unused dependencies
+- No console spam
+- No duplicated logic
+- No huge components
+- No unnecessary global state
+- Clear naming
+- Reusable components
+- Proper cleanup
+- Proper effect dependencies
+- Proper video lifecycle
+
+Do not rewrite stable code unnecessarily.
+
+Make the architecture easy for another engineer to understand.
+
+============================================================
+PHASE 15 — README
+============================================================
+
+Create a professional README.md.
+
+Include:
+
+# Project Overview
+
+Explain the application.
+
+# Features
+
+Include:
+
+- Home feed
+- Categories
+- Shorts
+- Full-screen Shorts
+- Video player
+- Shared-element-style transition
+- Gesture-driven mini-player
+- Video lifecycle management
+
+# Tech Stack
+
+Explain important libraries and WHY they were selected.
+
+# Architecture
+
+Explain:
+
+- Screens
+- Components
+- Hooks
+- State management
+- Video lifecycle
+
+# Video Lifecycle Strategy
+
+Explain:
+
+- How active videos are determined
+- How inactive videos are paused
+- What gets preloaded
+- How resources are cleaned up
+- How overlapping playback is prevented
+
+# Shorts Preloading Strategy
+
+Explain exactly what is preloaded and why.
+
+# Gesture Architecture
+
+Explain:
+
+- Watch → Mini Player
+- Finger-driven movement
+- Threshold
+- Snap behavior
+- Restoration
+- Gesture conflict handling
+
+# Performance Strategy
+
+Explain:
+
+- FlashList/FlatList
+- Memoization
+- Stable keys
+- Reanimated
+- Gesture Handler
+- Video mounting/unmounting
+- Image handling
+
+# Setup
+
+Provide exact setup commands.
+
+Example:
+
+npm install
+npx expo start
+
+Explain Android setup.
+
+# Build
+
+Explain how to generate/run the Android build or Expo preview.
+
+# Known Limitations
+
+Be honest about intentional simplifications.
+
+============================================================
+PHASE 16 — FINAL DEMONSTRATION PREPARATION
+============================================================
+
+Prepare the application for the hiring demo.
+
+The screen recording should demonstrate:
+
+1. Launch app
+2. Home screen
+3. Fast feed scrolling
+4. Categories
+5. Shorts section
+6. Open Short
+7. Rapid Shorts swiping
+8. Show correct active-video behavior
+9. Return Home
+10. Open normal video
+11. Show shared-element-style transition
+12. Play video
+13. Scroll Watch details
+14. Drag Watch screen downward
+15. Show finger-driven movement
+16. Minimize into mini-player
+17. Tap mini-player
+18. Restore Watch
+19. Return Home
+20. Repeat interaction to demonstrate reliability
+
+Keep the demo short and focused.
+
+============================================================
+FINAL ENGINEERING RULES
+============================================================
+
+1. Do not implement everything in one step.
+2. Complete phases sequentially.
+3. Keep the application runnable after every phase.
+4. Never break previously working functionality unnecessarily.
+5. Prefer stable, simple solutions over complicated abstractions.
+6. Performance is more important than decorative UI.
+7. Video lifecycle is a major priority.
+8. Gesture quality is a major priority.
+9. Shared-element-style transition is a core requirement.
+10. Mini-player interaction is a core requirement.
+11. Use TypeScript throughout.
+12. Avoid unnecessary dependencies.
+13. Do not add backend functionality unless required.
+14. Mock data is acceptable.
+15. Do not render the main feed using Array.map().
+16. Do not keep all videos playing/mounted unnecessarily.
+17. Do not allow overlapping audio.
+18. Do not drive high-frequency gestures through React state.
+19. Handle loading and playback errors.
+20. Test rapid repeated navigation.
+21. Test rapid Shorts swiping.
+22. Test Home → Watch → Mini Player → Watch repeatedly.
+23. Keep components reasonably small.
+24. Document important technical decisions.
+25. Do not add features that are not relevant to the assignment until the core requirements are excellent.
+
+FINAL QUALITY BAR:
+
+The finished application should feel like:
+
+"A small but professionally engineered video application."
+
+It should NOT feel like:
+
+"A static UI mockup with a few videos."
+
+The final priority order is:
+
+1. Smoothness
+2. Video lifecycle
+3. Gestures
+4. Animation continuity
+5. Reliability
+6. Architecture
+7. UI polish
+
+Only consider the project complete when all required flows work reliably and smoothly.
