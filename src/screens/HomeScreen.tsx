@@ -6,9 +6,9 @@ import {
   FlatList,
   TouchableOpacity,
   ScrollView,
-  Image,
   StatusBar,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +19,54 @@ import { MOCK_SHORTS } from '../data/mockShorts';
 import { Video } from '../types/video';
 import { formatDuration, formatViews } from '../utils/formatters';
 import { useGlobalPlayer } from '../context/PlayerContext';
+
+const VideoCardItem = React.memo(function VideoCardItem({
+  video,
+  onPress,
+}: {
+  video: Video;
+  onPress: (video: Video) => void;
+}) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.88}
+      style={styles.videoCard}
+      onPress={() => onPress(video)}
+    >
+      <View style={styles.thumbnailWrapper}>
+        <Image
+          source={{ uri: video.thumbnailUrl }}
+          style={styles.thumbnail}
+          contentFit="cover"
+          transition={150}
+        />
+        <View style={styles.durationBadge}>
+          <Text style={styles.durationText}>{formatDuration(video.duration)}</Text>
+        </View>
+      </View>
+
+      <View style={styles.metaContainer}>
+        <Image
+          source={{ uri: video.creatorAvatar }}
+          style={styles.avatar}
+          contentFit="cover"
+          transition={150}
+        />
+        <View style={styles.metaContent}>
+          <Text style={styles.videoTitle} numberOfLines={2}>
+            {video.title}
+          </Text>
+          <Text style={styles.creatorMeta} numberOfLines={1}>
+            {video.creatorName} • {formatViews(video.views)} • {video.uploadedAt}
+          </Text>
+        </View>
+        <TouchableOpacity style={styles.moreButton} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Ionicons name="ellipsis-vertical" size={18} color={Colors.dark.textSecondary} />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+});
 
 export function HomeScreen() {
   const router = useRouter();
@@ -41,33 +89,7 @@ export function HomeScreen() {
   }, [router]);
 
   const renderVideoItem = useCallback(({ item }: { item: Video }) => (
-    <TouchableOpacity
-      activeOpacity={0.88}
-      style={styles.videoCard}
-      onPress={() => handlePressVideo(item)}
-    >
-      <View style={styles.thumbnailWrapper}>
-        <Image source={{ uri: item.thumbnailUrl }} style={styles.thumbnail} />
-        <View style={styles.durationBadge}>
-          <Text style={styles.durationText}>{formatDuration(item.duration)}</Text>
-        </View>
-      </View>
-
-      <View style={styles.metaContainer}>
-        <Image source={{ uri: item.creatorAvatar }} style={styles.avatar} />
-        <View style={styles.metaContent}>
-          <Text style={styles.videoTitle} numberOfLines={2}>
-            {item.title}
-          </Text>
-          <Text style={styles.creatorMeta} numberOfLines={1}>
-            {item.creatorName} • {formatViews(item.views)} • {item.uploadedAt}
-          </Text>
-        </View>
-        <TouchableOpacity style={styles.moreButton} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="ellipsis-vertical" size={18} color={Colors.dark.textSecondary} />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
+    <VideoCardItem video={item} onPress={handlePressVideo} />
   ), [handlePressVideo]);
 
   const renderHeader = () => (

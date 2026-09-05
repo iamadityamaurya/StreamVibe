@@ -1,11 +1,11 @@
-import React, { useState, useCallback, useEffect, memo } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Short } from '../../types/video';
@@ -41,15 +41,7 @@ export const ShortItem = memo(
     const [likeCount, setLikeCount] = useState(short.likes);
     const [isSubscribed, setIsSubscribed] = useState(false);
 
-    useEffect(() => {
-      console.log('[ShortItem] Active state updated:', {
-        shortId: short.id,
-        title: short.title,
-        isActive,
-        shouldMountPlayer,
-        videoUrl: short.videoUrl,
-      });
-    }, [short.id, short.title, short.videoUrl, isActive, shouldMountPlayer]);
+
 
     const handleToggleLike = useCallback(() => {
       if (isLiked) {

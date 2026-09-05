@@ -3,12 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   ScrollView,
   useWindowDimensions,
   Pressable,
 } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -32,11 +32,18 @@ const TAB_BAR_HEIGHT = 56;
 export function MiniPlayerOverlay() {
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useWindowDimensions();
-  const { activeVideo, playerMode, minimizePlayer, expandPlayer, closePlayer } =
+  const { activeVideo, playerMode, playVideo, minimizePlayer, expandPlayer, closePlayer } =
     useGlobalPlayer();
 
+  const scrollViewRef = React.useRef<ScrollView>(null);
   const translateY = useSharedValue(screenHeight);
   const snapDistance = screenHeight - MINI_PLAYER_HEIGHT - TAB_BAR_HEIGHT;
+
+  useEffect(() => {
+    if (activeVideo?.id) {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    }
+  }, [activeVideo?.id]);
 
   // React to playerMode changes
   useEffect(() => {
@@ -180,7 +187,7 @@ export function MiniPlayerOverlay() {
 
         {/* Full Screen Scrollable Details (Independent Smooth Scrolling) */}
         <Animated.View style={[styles.detailsContainer, detailsAnimatedStyle]} pointerEvents={isMini ? 'none' : 'auto'}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+            <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
               <Text style={styles.title}>{activeVideo.title}</Text>
               <Text style={styles.metadata}>
                 {formatViews(activeVideo.views)} • {activeVideo.uploadedAt}
@@ -226,7 +233,12 @@ export function MiniPlayerOverlay() {
               {/* Related Videos */}
               <Text style={styles.upNextHeader}>Related Videos</Text>
               {MOCK_VIDEOS.filter((v) => v.id !== activeVideo.id).slice(0, 5).map((related) => (
-                <TouchableOpacity key={related.id} style={styles.relatedCard}>
+                <TouchableOpacity
+                  key={related.id}
+                  style={styles.relatedCard}
+                  activeOpacity={0.8}
+                  onPress={() => playVideo(related)}
+                >
                   <Image source={{ uri: related.thumbnailUrl }} style={styles.relatedThumb} />
                   <View style={styles.relatedMeta}>
                     <Text style={styles.relatedTitle} numberOfLines={2}>

@@ -1,13 +1,15 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Image,
   Pressable,
+  LayoutChangeEvent,
+  PanResponder,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Radius, Typography } from '../../constants/theme';
@@ -20,7 +22,7 @@ export function VideoPlayer({
   videoUrl,
   thumbnailUrl,
   autoPlay = true,
-  isLooping = false,ad
+  isLooping = false,
   muted = false,
   isActive = true,
   showControls = true,
@@ -78,27 +80,14 @@ export function VideoPlayer({
   // Sync source if videoUrl changes
   useEffect(() => {
     if (player) {
-      console.log('[VideoPlayer] Source sync / update:', videoUrl, 'isActive:', isActive);
       setError(null);
       setIsBuffering(true);
-      player.replaceAsync(videoUrl).then(() => {
-        if (autoPlay && isActive) {
-          try {
-            player.play();
-          } catch (err) {
-            console.warn('[VideoPlayer] Play error on source change:', err);
-          }
-        }
-      }).catch((err) => {
-        console.warn('[VideoPlayer] Replace error:', err);
-      });
     }
-  }, [videoUrl, player, setError, setIsBuffering, autoPlay, isActive]);
+  }, [videoUrl, player, setError, setIsBuffering]);
 
   // Check initial ready status
   useEffect(() => {
     if (player && player.status === 'readyToPlay') {
-      console.log('[VideoPlayer] Initial status readyToPlay for:', videoUrl);
       setIsBuffering(false);
       setError(null);
     }
@@ -108,7 +97,6 @@ export function VideoPlayer({
   useEffect(() => {
     if (!player) return;
 
-    console.log('[VideoPlayer] Active state changed:', { isActive, autoPlay, videoUrl });
     if (isActive) {
       if (autoPlay) {
         try {
@@ -136,7 +124,6 @@ export function VideoPlayer({
 
     const subscriptions = [
       player.addListener('playingChange', (event) => {
-        console.log('[VideoPlayer] Event playingChange:', event.isPlaying, videoUrl);
         setIsPlaying(event.isPlaying);
         if (event.isPlaying) {
           setIsBuffering(false);
@@ -146,7 +133,6 @@ export function VideoPlayer({
       }),
 
       player.addListener('statusChange', (event) => {
-        console.log('[VideoPlayer] Event statusChange:', event.status, videoUrl);
         if (event.status === 'loading') {
           setIsBuffering(true);
         } else if (event.status === 'readyToPlay') {
@@ -226,6 +212,77 @@ export function VideoPlayer({
     }
   }, [globalPlayer, player, setIsMuted]);
 
+  const progressBarRef = useRef<View>(null);
+  const progressBarWidthRef = useRef(0);
+  const progressBarPageXRef = useRef(0);
+  const isSeekingRef = useRef(false);
+
+  const updatePageOffset = useCallback(() => {
+    progressBarRef.current?.measureInWindow((x) => {
+      if (typeof x === 'number' && x >= 0) {
+        progressBarPageXRef.current = x;
+      }
+    });
+  }, []);
+
+  const handleProgressBarLayout = useCallback((e: LayoutChangeEvent) => {
+    const { width } = e.nativeEvent.layout;
+    if (width > 0) {
+      progressBarWidthRef.current = width;
+      updatePageOffset();
+    }
+  }, [updatePageOffset]);
+
+  const handleSeekLocation = useCallback(
+    (pageX: number) => {
+      const width = progressBarWidthRef.current;
+      if (!player || width <= 0) return;
+
+      const duration = player.duration || 1;
+      const offsetX = progressBarPageXRef.current;
+      const touchX = pageX - offsetX;
+      const clampedX = Math.max(0, Math.min(touchX, width));
+      const seekPercent = clampedX / width;
+      const targetTime = seekPercent * duration;
+
+      try {
+        player.currentTime = targetTime;
+      } catch {
+        try {
+          player.seekBy(targetTime - (player.currentTime || 0));
+        } catch (err) {
+          console.warn('[VideoPlayer] Seek error:', err);
+        }
+      }
+      setProgress(seekPercent, targetTime, duration);
+    },
+    [player, setProgress]
+  );
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderGrant: (evt) => {
+        isSeekingRef.current = true;
+        updatePageOffset();
+        handleSeekLocation(evt.nativeEvent.pageX);
+      },
+      onPanResponderMove: (evt) => {
+        handleSeekLocation(evt.nativeEvent.pageX);
+      },
+      onPanResponderRelease: (evt) => {
+        handleSeekLocation(evt.nativeEvent.pageX);
+        isSeekingRef.current = false;
+      },
+      onPanResponderTerminate: () => {
+        isSeekingRef.current = false;
+      },
+    })
+  ).current;
+
   const handleRetry = useCallback(() => {
     if (!player) return;
     setError(null);
@@ -298,12 +355,18 @@ export function VideoPlayer({
 
       {/* Touch Controls Overlay */}
       {showControls && controlsVisible && !playerState.error && (
-        <View style={styles.controlsOverlay}>
+        <Pressable
+          style={styles.controlsOverlay}
+          onPress={toggleControls}
+        >
           {/* Top Mute Control */}
           <View style={styles.topControls}>
             <TouchableOpacity
               style={styles.controlIconBg}
-              onPress={handleToggleMute}
+              onPress={(e) => {
+                e.stopPropagation();
+                handleToggleMute();
+              }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <Ionicons
@@ -317,7 +380,10 @@ export function VideoPlayer({
           {/* Play / Pause Center Button */}
           <TouchableOpacity
             style={styles.playPauseBtn}
-            onPress={handleTogglePlayPause}
+            onPress={(e) => {
+              e.stopPropagation();
+              handleTogglePlayPause();
+            }}
             activeOpacity={0.8}
           >
             <Ionicons
@@ -327,19 +393,40 @@ export function VideoPlayer({
             />
           </TouchableOpacity>
 
-          {/* Bottom Bar: Progress Bar & Time text */}
-          <View style={styles.bottomBar}>
-            <View style={styles.progressBarBg}>
-              <View
-                style={[styles.progressBarFill, { width: `${(playerState.progress || 0) * 100}%` }]}
-              />
+          {/* Bottom Bar: Interactive Progress Bar & Time text */}
+          <Pressable
+            style={styles.bottomBar}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View
+              ref={progressBarRef}
+              style={styles.progressBarContainer}
+              onLayout={handleProgressBarLayout}
+              {...panResponder.panHandlers}
+            >
+              <View style={styles.progressBarBg} pointerEvents="none">
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    { width: `${Math.min(100, Math.max(0, (playerState.progress || 0) * 100))}%` },
+                  ]}
+                  pointerEvents="none"
+                />
+                <View
+                  style={[
+                    styles.scrubberKnob,
+                    { left: `${Math.min(100, Math.max(0, (playerState.progress || 0) * 100))}%` },
+                  ]}
+                  pointerEvents="none"
+                />
+              </View>
             </View>
 
             <Text style={styles.timeText}>
               {formatDuration(playerState.currentTime)} / {formatDuration(playerState.duration)}
             </Text>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       )}
     </Pressable>
   );
@@ -435,18 +522,33 @@ const styles = StyleSheet.create({
     paddingLeft: 2,
   },
   bottomBar: {
-    gap: 6,
+    gap: 4,
+  },
+  progressBarContainer: {
+    width: '100%',
+    height: 18,
+    justifyContent: 'center',
   },
   progressBarBg: {
     width: '100%',
-    height: 3,
+    height: 4,
     backgroundColor: 'rgba(255,255,255,0.3)',
     borderRadius: 2,
-    overflow: 'hidden',
+    position: 'relative',
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: Colors.dark.primary,
+    borderRadius: 2,
+  },
+  scrubberKnob: {
+    position: 'absolute',
+    top: -4,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: Colors.dark.primary,
+    marginLeft: -6,
   },
   timeText: {
     color: '#FFFFFF',
