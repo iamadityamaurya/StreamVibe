@@ -20,7 +20,7 @@ export function VideoPlayer({
   videoUrl,
   thumbnailUrl,
   autoPlay = true,
-  isLooping = false,
+  isLooping = false,ad
   muted = false,
   isActive = true,
   showControls = true,
