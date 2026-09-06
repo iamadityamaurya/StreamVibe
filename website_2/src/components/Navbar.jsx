@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import logoImg from '../assets/logo.jpg';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -35,24 +35,19 @@ export default function Navbar() {
           justifyContent: 'space-between',
         }}
       >
-        {/* Brand Logo - Official Red Emblem */}
+        {/* Brand Logo - Official StreamVibe Emblem */}
         <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <div
+          <img
+            src={logoImg}
+            alt="StreamVibe"
             style={{
-              width: '30px',
-              height: '30px',
+              width: '32px',
+              height: '32px',
               borderRadius: '8px',
-              background: '#FF0033',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              objectFit: 'cover',
               boxShadow: '0 2px 10px rgba(255, 0, 51, 0.35)',
             }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFFFFF" style={{ marginLeft: '2px' }}>
-              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-          </div>
+          />
           <span style={{ fontSize: '1.2rem', fontWeight: '800', letterSpacing: '-0.02em', color: '#ffffff' }}>
             StreamVibe
           </span>

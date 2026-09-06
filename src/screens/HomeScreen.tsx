@@ -159,9 +159,11 @@ export function HomeScreen() {
       {/* App Bar */}
       <View style={styles.appBar}>
         <View style={styles.logoRow}>
-          <View style={styles.logoIconBg}>
-            <Ionicons name="play" size={16} color="#FFFFFF" />
-          </View>
+          <Image
+            source={require('../../assets/images/icon.png')}
+            style={styles.logoImage}
+            contentFit="cover"
+          />
           <Text style={styles.logoText}>StreamVibe</Text>
         </View>
 
@@ -211,13 +213,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  logoIconBg: {
+  logoImage: {
     width: 28,
     height: 28,
     borderRadius: Radius.sm,
-    backgroundColor: Colors.dark.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   logoText: {
     color: Colors.dark.text,

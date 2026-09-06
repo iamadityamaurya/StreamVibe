@@ -1,4 +1,4 @@
-import React from 'react';
+import logoImg from '../assets/logo.jpg';
 
 export default function Footer() {
   return (
@@ -6,21 +6,16 @@ export default function Footer() {
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', fontSize: '0.85rem', color: 'var(--text-dim)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div
+            <img
+              src={logoImg}
+              alt="StreamVibe"
               style={{
                 width: '24px',
                 height: '24px',
                 borderRadius: '6px',
-                background: '#FF0033',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                objectFit: 'cover',
               }}
-            >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="#FFFFFF" style={{ marginLeft: '1px' }}>
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-            </div>
+            />
             <span style={{ fontWeight: '700', color: '#fff' }}>StreamVibe</span>
             <span>• Video-First Mobile Application</span>
           </div>
