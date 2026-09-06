@@ -51,14 +51,16 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
   const [controlsVisible, setControlsVisible] = useState(showControls);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isEnded, setIsEnded] = useState(false);
   const videoViewRef = useRef<VideoView>(null);
   const userPausedRef = useRef(false);
   const playerStateRef = useRef(playerState);
   playerStateRef.current = playerState;
 
-  // Reset userPausedRef when videoUrl changes
+  // Reset userPausedRef and isEnded state when videoUrl changes
   useEffect(() => {
     userPausedRef.current = false;
+    setIsEnded(false);
   }, [videoUrl]);
 
   // Initialize expo-video player instance
@@ -202,6 +204,7 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
         onEnd?.();
         if (!isLooping) {
           setIsPlaying(false);
+          setIsEnded(true);
         }
       }),
     ];
@@ -217,8 +220,36 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
     };
   }, [player, isActive, autoPlay, videoUrl, setIsPlaying, setIsBuffering, setError, setProgress, onError, onEnd, isLooping, onPlaybackStatusUpdate]);
 
+  const handleReplay = useCallback(() => {
+    if (!player) return;
+    setError(null);
+    userPausedRef.current = false;
+    setIsEnded(false);
+    try {
+      player.currentTime = 0;
+    } catch {
+      try {
+        player.seekBy(-10000);
+      } catch (e) {
+        console.warn('Replay seek error:', e);
+      }
+    }
+    try {
+      player.play();
+      setIsPlaying(true);
+      onPlaybackStatusUpdate?.({ isPlaying: true, progress: 0, currentTime: 0 });
+    } catch (e) {
+      console.warn('Replay error:', e);
+    }
+  }, [player, setError, setIsPlaying, onPlaybackStatusUpdate]);
+
   const handleTogglePlayPause = useCallback(() => {
     if (!player) return;
+
+    if (isEnded) {
+      handleReplay();
+      return;
+    }
 
     setError(null);
     const isCurrentlyPlaying = player.playing ?? playerStateRef.current.isPlaying;
@@ -242,7 +273,7 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
     setIsPlaying(nextState);
     onPlaybackStatusUpdate?.({ isPlaying: nextState });
-  }, [player, setError, setIsPlaying, onPlaybackStatusUpdate]);
+  }, [player, isEnded, handleReplay, setError, setIsPlaying, onPlaybackStatusUpdate]);
 
   React.useImperativeHandle(
     ref,
@@ -441,8 +472,22 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
         </View>
       )}
 
-      {/* Center Play Icon in Vertical View (stays visible as long as video is paused) */}
-      {showCenterPlayIcon && !playerState.isPlaying && !playerState.isBuffering && !playerState.error && (
+      {/* Replay Overlay when video ends */}
+      {isEnded && !playerState.isBuffering && !playerState.error && (
+        <TouchableOpacity
+          style={styles.centerOverlay}
+          onPress={handleReplay}
+          activeOpacity={0.85}
+        >
+          <View style={styles.playPauseBtn}>
+            <Ionicons name="reload" size={30} color="#FFFFFF" />
+          </View>
+          <Text style={styles.replayText}>Replay</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Center Play Icon in Vertical View (stays visible when video is paused and not ended) */}
+      {!isEnded && showCenterPlayIcon && !playerState.isPlaying && !playerState.isBuffering && !playerState.error && (
         <View style={styles.centerOverlay} pointerEvents="none">
           <View style={styles.playPauseBtn}>
             <Ionicons name="play" size={34} color="#FFFFFF" />
@@ -474,17 +519,21 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
             </TouchableOpacity>
           </View>
 
-          {/* Play / Pause Center Button */}
+          {/* Play / Pause / Replay Center Button */}
           <TouchableOpacity
             style={styles.playPauseBtn}
             onPress={(e) => {
               e.stopPropagation();
-              handleTogglePlayPause();
+              if (isEnded) {
+                handleReplay();
+              } else {
+                handleTogglePlayPause();
+              }
             }}
             activeOpacity={0.8}
           >
             <Ionicons
-              name={playerState.isPlaying ? 'pause' : 'play'}
+              name={isEnded ? 'reload' : playerState.isPlaying ? 'pause' : 'play'}
               size={32}
               color="#FFFFFF"
             />
@@ -575,6 +624,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  replayText: {
+    color: '#FFFFFF',
+    fontSize: Typography.fontSize.caption,
+    fontWeight: '600',
+    marginTop: 6,
   },
   errorOverlay: {
     ...StyleSheet.absoluteFillObject,
