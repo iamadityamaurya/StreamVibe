@@ -18,21 +18,31 @@ import { formatDuration } from '../../utils/formatters';
 import { usePlayerState } from '../../hooks/usePlayerState';
 import { useGlobalPlayer } from '../../context/PlayerContext';
 
-export function VideoPlayer({
-  videoUrl,
-  thumbnailUrl,
-  autoPlay = true,
-  isLooping = false,
-  muted = false,
-  isActive = true,
-  showControls = true,
-  showCenterPlayIcon = false,
-  onPlaybackStatusUpdate,
-  onError,
-  onEnd,
-  style,
-  contentFit = 'contain',
-}: VideoPlayerProps) {
+export interface VideoPlayerRef {
+  play: () => void;
+  pause: () => void;
+  togglePlayPause: () => void;
+}
+
+export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
+  function VideoPlayer(
+    {
+      videoUrl,
+      thumbnailUrl,
+      autoPlay = true,
+      isLooping = false,
+      muted = false,
+      isActive = true,
+      showControls = true,
+      showCenterPlayIcon = false,
+      onPlaybackStatusUpdate,
+      onError,
+      onEnd,
+      style,
+      contentFit = 'contain',
+    },
+    ref
+  ) {
   const { playerState, setIsPlaying, setProgress, setIsBuffering, setIsMuted, setError } =
     usePlayerState();
   const globalPlayer = useGlobalPlayer();
@@ -221,6 +231,32 @@ export function VideoPlayer({
       }
     }
   }, [player, setError, setIsPlaying]);
+
+  React.useImperativeHandle(
+    ref,
+    () => ({
+      play: () => {
+        if (!player) return;
+        try {
+          player.play();
+          setIsPlaying(true);
+        } catch (e) {
+          console.warn('Imperative play error:', e);
+        }
+      },
+      pause: () => {
+        if (!player) return;
+        try {
+          player.pause();
+          setIsPlaying(false);
+        } catch (e) {
+          console.warn('Imperative pause error:', e);
+        }
+      },
+      togglePlayPause: handleTogglePlayPause,
+    }),
+    [player, handleTogglePlayPause, setIsPlaying]
+  );
 
   const handleToggleMute = useCallback(() => {
     if (globalPlayer) {
@@ -490,7 +526,7 @@ export function VideoPlayer({
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   interpolate,
+  interpolateColor,
   Extrapolation,
   runOnJS,
 } from 'react-native-reanimated';
@@ -22,7 +23,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '../../constants/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGlobalPlayer } from '../../context/PlayerContext';
-import { VideoPlayer } from './VideoPlayer';
+import { VideoPlayer, VideoPlayerRef } from './VideoPlayer';
 import { MOCK_VIDEOS } from '../../data/mockVideos';
 import { formatLikes, formatViews } from '../../utils/formatters';
 
@@ -31,11 +32,12 @@ const TAB_BAR_HEIGHT = 56;
 
 export function MiniPlayerOverlay() {
   const insets = useSafeAreaInsets();
-  const { height: screenHeight } = useWindowDimensions();
+  const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const { activeVideo, playerMode, playVideo, minimizePlayer, expandPlayer, closePlayer } =
     useGlobalPlayer();
 
-  const scrollViewRef = React.useRef<ScrollView>(null);
+  const playerRef = useRef<VideoPlayerRef>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
   const [isPlaying, setIsPlaying] = React.useState(true);
   const [progressPercent, setProgressPercent] = React.useState(0);
 
@@ -51,9 +53,9 @@ export function MiniPlayerOverlay() {
   // React to playerMode changes
   useEffect(() => {
     if (playerMode === 'full') {
-      translateY.value = withTiming(0, { duration: 200 });
+      translateY.value = withTiming(0, { duration: 220 });
     } else if (playerMode === 'mini') {
-      translateY.value = withTiming(snapDistance, { duration: 200 });
+      translateY.value = withTiming(snapDistance, { duration: 220 });
     } else if (playerMode === 'hidden') {
       translateY.value = withTiming(screenHeight, { duration: 180 });
     }
@@ -70,6 +72,10 @@ export function MiniPlayerOverlay() {
   const handleClose = useCallback(() => {
     closePlayer();
   }, [closePlayer]);
+
+  const handleTogglePlayPause = useCallback(() => {
+    playerRef.current?.togglePlayPause();
+  }, []);
 
   const handlePlaybackUpdate = useCallback((status: { isPlaying?: boolean; progress?: number }) => {
     if (typeof status.isPlaying === 'boolean') {
@@ -121,23 +127,110 @@ export function MiniPlayerOverlay() {
     };
   });
 
-  // Animated opacity for full details content
-  const detailsAnimatedStyle = useAnimatedStyle(() => {
+  // Animated opacity for drag chevron header
+  const dragHeaderAnimatedStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       translateY.value,
-      [0, snapDistance * 0.4],
+      [0, snapDistance * 0.3],
       [1, 0],
       Extrapolation.CLAMP
     );
     return { opacity };
   });
 
-  // Animated styles for mini player bar overlay
-  const miniBarAnimatedStyle = useAnimatedStyle(() => {
+  // Animated styles for morphing card container
+  const cardAnimatedStyle = useAnimatedStyle(() => {
+    const marginH = interpolate(
+      translateY.value,
+      [0, snapDistance],
+      [0, 12],
+      Extrapolation.CLAMP
+    );
+    const cardHeight = interpolate(
+      translateY.value,
+      [0, snapDistance],
+      [230, MINI_PLAYER_HEIGHT],
+      Extrapolation.CLAMP
+    );
+    const borderRadius = interpolate(
+      translateY.value,
+      [0, snapDistance],
+      [0, 12],
+      Extrapolation.CLAMP
+    );
+    const bgColor = interpolateColor(
+      translateY.value,
+      [0, snapDistance],
+      ['#000000', '#212121']
+    );
+
+    return {
+      marginHorizontal: marginH,
+      height: cardHeight,
+      borderRadius,
+      backgroundColor: bgColor,
+    };
+  });
+
+  // Animated styles for morphing video viewport wrapper inside card
+  const videoWrapperAnimatedStyle = useAnimatedStyle(() => {
+    const width = interpolate(
+      translateY.value,
+      [0, snapDistance],
+      [screenWidth, 96],
+      Extrapolation.CLAMP
+    );
+    const height = interpolate(
+      translateY.value,
+      [0, snapDistance],
+      [230, 52],
+      Extrapolation.CLAMP
+    );
+    const borderRadius = interpolate(
+      translateY.value,
+      [0, snapDistance],
+      [0, 8],
+      Extrapolation.CLAMP
+    );
+    const marginTop = interpolate(
+      translateY.value,
+      [0, snapDistance],
+      [0, 6],
+      Extrapolation.CLAMP
+    );
+    const marginLeft = interpolate(
+      translateY.value,
+      [0, snapDistance],
+      [0, 6],
+      Extrapolation.CLAMP
+    );
+
+    return {
+      width,
+      height,
+      borderRadius,
+      marginTop,
+      marginLeft,
+    };
+  });
+
+  // Animated opacity for mini player controls
+  const miniControlsAnimatedStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       translateY.value,
-      [snapDistance * 0.6, snapDistance],
+      [snapDistance * 0.7, snapDistance],
       [0, 1],
+      Extrapolation.CLAMP
+    );
+    return { opacity };
+  });
+
+  // Animated opacity for full details content
+  const detailsAnimatedStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      translateY.value,
+      [0, snapDistance * 0.4],
+      [1, 0],
       Extrapolation.CLAMP
     );
     return { opacity };
@@ -150,161 +243,167 @@ export function MiniPlayerOverlay() {
   const isMini = playerMode === 'mini';
 
   return (
-    <Animated.View style={[styles.rootContainer, containerAnimatedStyle]} pointerEvents={isMini ? 'box-none' : 'auto'}>
+    <Animated.View
+      style={[styles.rootContainer, containerAnimatedStyle]}
+      pointerEvents={isMini ? 'box-none' : 'auto'}
+    >
       <View style={styles.contentWrapper} pointerEvents={isMini ? 'box-none' : 'auto'}>
-        {/* Top Interactive Area (Pan Gesture enabled for minimization) */}
+        {/* Top Interactive Area (Pan Gesture enabled) */}
         <GestureDetector gesture={panGesture}>
-          <Animated.View>
-            {/* Top Drag Indicator / Header Overlay (Visible when Fullscreen) */}
-            {!isMini && (
-              <View style={[styles.dragHeader, { top: Math.max(insets.top + 8, 16) }]}>
-                <TouchableOpacity style={styles.minimizeBtn} onPress={handleMinimize}>
-                  <Ionicons name="chevron-down" size={28} color="#FFFFFF" />
-                </TouchableOpacity>
-                <View style={styles.dragPill} />
-              </View>
-            )}
+          <Animated.View pointerEvents={isMini ? 'box-none' : 'auto'}>
+            {/* Top Drag Header Chevron (Visible in full screen view) */}
+            <Animated.View
+              style={[styles.dragHeader, { top: Math.max(insets.top + 8, 16) }, dragHeaderAnimatedStyle]}
+              pointerEvents={isMini ? 'none' : 'auto'}
+            >
+              <TouchableOpacity style={styles.minimizeBtn} onPress={handleMinimize}>
+                <Ionicons name="chevron-down" size={28} color="#FFFFFF" />
+              </TouchableOpacity>
+              <View style={styles.dragPill} />
+            </Animated.View>
 
-            {/* Main Video Viewport or Modern YouTube Floating Mini Player Card */}
-            {isMini ? (
-              <Animated.View style={[styles.miniFloatingCard, miniBarAnimatedStyle]}>
-                <Pressable style={styles.miniCardPressArea} onPress={handleExpand}>
-                  {/* Left: 16:9 Video Surface */}
-                  <View style={styles.miniCardVideoContainer}>
-                    <VideoPlayer
-                      videoUrl={activeVideo.videoUrl}
-                      thumbnailUrl={activeVideo.thumbnailUrl}
-                      autoPlay={true}
-                      showControls={false}
-                      onPlaybackStatusUpdate={handlePlaybackUpdate}
-                      style={styles.fullPlayer}
-                    />
-                  </View>
-
-                  {/* Middle: Video Title & Creator Meta */}
-                  <View style={styles.miniCardMeta}>
-                    <Text style={styles.miniCardTitle} numberOfLines={1}>
-                      {activeVideo.title}
-                    </Text>
-                    <Text style={styles.miniCardCreator} numberOfLines={1}>
-                      {activeVideo.creatorName}
-                    </Text>
-                  </View>
-
-                  {/* Right: Actions (Play/Pause + Close) */}
-                  <View style={styles.miniCardActions}>
-                    <TouchableOpacity
-                      style={styles.miniActionBtn}
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        // Toggle play/pause
-                        handlePlaybackUpdate({ isPlaying: !isPlaying });
-                      }}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                      <Ionicons name={isPlaying ? 'pause' : 'play'} size={20} color="#FFFFFF" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.miniActionBtn}
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        handleClose();
-                      }}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                      <Ionicons name="close" size={22} color="#FFFFFF" />
-                    </TouchableOpacity>
-                  </View>
-                </Pressable>
-
-                {/* Bottom Red Accent Progress Bar */}
-                <View style={styles.miniCardProgressTrack}>
-                  <View style={[styles.miniCardProgressFill, { width: `${progressPercent}%` }]} />
-                </View>
-              </Animated.View>
-            ) : (
-              <View style={styles.fullVideoViewport}>
+            {/* Morphing Video & Mini Player Container */}
+            <Animated.View style={[styles.mainCardContainer, cardAnimatedStyle]}>
+              {/* Morphing Video Viewport Wrapper (Holds SINGLE persistent VideoPlayer) */}
+              <Animated.View style={[styles.videoWrapper, videoWrapperAnimatedStyle]}>
                 <VideoPlayer
+                  ref={playerRef}
                   videoUrl={activeVideo.videoUrl}
                   thumbnailUrl={activeVideo.thumbnailUrl}
                   autoPlay={true}
-                  showControls={true}
+                  showControls={!isMini}
                   onPlaybackStatusUpdate={handlePlaybackUpdate}
                   style={styles.fullPlayer}
                 />
-              </View>
-            )}
+                {/* Transparent touch area on video surface in mini mode to expand */}
+                {isMini && (
+                  <Pressable
+                    style={StyleSheet.absoluteFill}
+                    onPress={handleExpand}
+                  />
+                )}
+              </Animated.View>
+
+              {/* Mini Player Metadata & Action Controls */}
+              <Animated.View
+                style={[styles.miniControlsRow, miniControlsAnimatedStyle]}
+                pointerEvents={isMini ? 'auto' : 'none'}
+              >
+                <Pressable style={styles.miniMetaPressArea} onPress={handleExpand}>
+                  <Text style={styles.miniCardTitle} numberOfLines={1}>
+                    {activeVideo.title}
+                  </Text>
+                  <Text style={styles.miniCardCreator} numberOfLines={1}>
+                    {activeVideo.creatorName}
+                  </Text>
+                </Pressable>
+
+                <View style={styles.miniCardActions}>
+                  <TouchableOpacity
+                    style={styles.miniActionBtn}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleTogglePlayPause();
+                    }}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons name={isPlaying ? 'pause' : 'play'} size={20} color="#FFFFFF" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.miniActionBtn}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleClose();
+                    }}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons name="close" size={22} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+              </Animated.View>
+
+              {/* Mini Player Progress Accent Bar */}
+              <Animated.View
+                style={[styles.miniCardProgressTrack, miniControlsAnimatedStyle]}
+                pointerEvents="none"
+              >
+                <View style={[styles.miniCardProgressFill, { width: `${progressPercent}%` }]} />
+              </Animated.View>
+            </Animated.View>
           </Animated.View>
         </GestureDetector>
 
-        {/* Full Screen Scrollable Details (Independent Smooth Scrolling) */}
-        <Animated.View style={[styles.detailsContainer, detailsAnimatedStyle]} pointerEvents={isMini ? 'none' : 'auto'}>
-            <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-              <Text style={styles.title}>{activeVideo.title}</Text>
-              <Text style={styles.metadata}>
-                {formatViews(activeVideo.views)} • {activeVideo.uploadedAt}
-              </Text>
+        {/* Full View Details ScrollView */}
+        <Animated.View
+          style={[styles.detailsContainer, detailsAnimatedStyle]}
+          pointerEvents={isMini ? 'none' : 'auto'}
+        >
+          <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+            <Text style={styles.title}>{activeVideo.title}</Text>
+            <Text style={styles.metadata}>
+              {formatViews(activeVideo.views)} • {activeVideo.uploadedAt}
+            </Text>
 
-              {/* Action Buttons */}
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionsRow}>
-                <TouchableOpacity style={styles.actionChip}>
-                  <Ionicons name="thumbs-up-outline" size={18} color={Colors.dark.text} />
-                  <Text style={styles.actionChipText}>{formatLikes(activeVideo.likes)}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionChip}>
-                  <Ionicons name="share-social-outline" size={18} color={Colors.dark.text} />
-                  <Text style={styles.actionChipText}>Share</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionChip}>
-                  <Ionicons name="arrow-down-circle-outline" size={18} color={Colors.dark.text} />
-                  <Text style={styles.actionChipText}>Download</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionChip}>
-                  <Ionicons name="bookmark-outline" size={18} color={Colors.dark.text} />
-                  <Text style={styles.actionChipText}>Save</Text>
-                </TouchableOpacity>
-              </ScrollView>
-
-              {/* Creator Channel Row */}
-              <View style={styles.channelRow}>
-                <Image source={{ uri: activeVideo.creatorAvatar }} style={styles.channelAvatar} />
-                <View style={styles.channelMeta}>
-                  <Text style={styles.channelName}>{activeVideo.creatorName}</Text>
-                  <Text style={styles.channelSubscribers}>{activeVideo.creatorSubscribers} subscribers</Text>
-                </View>
-                <TouchableOpacity style={styles.subscribeBtn}>
-                  <Text style={styles.subscribeBtnText}>Subscribe</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Description Box */}
-              <View style={styles.descriptionBox}>
-                <Text style={styles.descriptionText}>{activeVideo.description}</Text>
-              </View>
-
-              {/* Related Videos */}
-              <Text style={styles.upNextHeader}>Related Videos</Text>
-              {MOCK_VIDEOS.filter((v) => v.id !== activeVideo.id).slice(0, 5).map((related) => (
-                <TouchableOpacity
-                  key={related.id}
-                  style={styles.relatedCard}
-                  activeOpacity={0.8}
-                  onPress={() => playVideo(related)}
-                >
-                  <Image source={{ uri: related.thumbnailUrl }} style={styles.relatedThumb} />
-                  <View style={styles.relatedMeta}>
-                    <Text style={styles.relatedTitle} numberOfLines={2}>
-                      {related.title}
-                    </Text>
-                    <Text style={styles.relatedSub} numberOfLines={1}>
-                      {related.creatorName} • {formatViews(related.views)}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
+            {/* Action Buttons */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionsRow}>
+              <TouchableOpacity style={styles.actionChip}>
+                <Ionicons name="thumbs-up-outline" size={18} color={Colors.dark.text} />
+                <Text style={styles.actionChipText}>{formatLikes(activeVideo.likes)}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionChip}>
+                <Ionicons name="share-social-outline" size={18} color={Colors.dark.text} />
+                <Text style={styles.actionChipText}>Share</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionChip}>
+                <Ionicons name="arrow-down-circle-outline" size={18} color={Colors.dark.text} />
+                <Text style={styles.actionChipText}>Download</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionChip}>
+                <Ionicons name="bookmark-outline" size={18} color={Colors.dark.text} />
+                <Text style={styles.actionChipText}>Save</Text>
+              </TouchableOpacity>
             </ScrollView>
-          </Animated.View>
-        </View>
+
+            {/* Creator Channel Row */}
+            <View style={styles.channelRow}>
+              <Image source={{ uri: activeVideo.creatorAvatar }} style={styles.channelAvatar} />
+              <View style={styles.channelMeta}>
+                <Text style={styles.channelName}>{activeVideo.creatorName}</Text>
+                <Text style={styles.channelSubscribers}>{activeVideo.creatorSubscribers} subscribers</Text>
+              </View>
+              <TouchableOpacity style={styles.subscribeBtn}>
+                <Text style={styles.subscribeBtnText}>Subscribe</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Description Box */}
+            <View style={styles.descriptionBox}>
+              <Text style={styles.descriptionText}>{activeVideo.description}</Text>
+            </View>
+
+            {/* Related Videos */}
+            <Text style={styles.upNextHeader}>Related Videos</Text>
+            {MOCK_VIDEOS.filter((v) => v.id !== activeVideo.id).slice(0, 5).map((related) => (
+              <TouchableOpacity
+                key={related.id}
+                style={styles.relatedCard}
+                activeOpacity={0.8}
+                onPress={() => playVideo(related)}
+              >
+                <Image source={{ uri: related.thumbnailUrl }} style={styles.relatedThumb} />
+                <View style={styles.relatedMeta}>
+                  <Text style={styles.relatedTitle} numberOfLines={2}>
+                    {related.title}
+                  </Text>
+                  <Text style={styles.relatedSub} numberOfLines={1}>
+                    {related.creatorName} • {formatViews(related.views)}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </Animated.View>
+      </View>
     </Animated.View>
   );
 }
@@ -317,11 +416,9 @@ const styles = StyleSheet.create({
   },
   contentWrapper: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
   },
   dragHeader: {
     position: 'absolute',
-    top: 12,
     left: 12,
     right: 12,
     flexDirection: 'row',
@@ -344,20 +441,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.4)',
     alignSelf: 'center',
   },
-  fullVideoViewport: {
-    width: '100%',
-    height: 230,
-    backgroundColor: '#000000',
-  },
-  fullPlayer: {
-    width: '100%',
-    height: '100%',
-  },
-  miniFloatingCard: {
-    marginHorizontal: 12,
-    height: MINI_PLAYER_HEIGHT,
-    backgroundColor: '#212121',
-    borderRadius: 12,
+  mainCardContainer: {
+    position: 'relative',
     overflow: 'hidden',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 6 },
@@ -367,24 +452,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
-  miniCardPressArea: {
-    flex: 1,
+  videoWrapper: {
+    position: 'absolute',
+    backgroundColor: '#000000',
+    overflow: 'hidden',
+  },
+  fullPlayer: {
+    width: '100%',
+    height: '100%',
+  },
+  miniControlsRow: {
+    position: 'absolute',
+    left: 108,
+    right: 8,
+    top: 0,
+    bottom: 2,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 6,
+    justifyContent: 'space-between',
   },
-  miniCardVideoContainer: {
-    width: 96,
-    height: 52,
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: '#000000',
-  },
-  miniCardMeta: {
+  miniMetaPressArea: {
     flex: 1,
-    marginLeft: 10,
-    marginRight: 8,
     justifyContent: 'center',
+    marginRight: 8,
   },
   miniCardTitle: {
     color: '#FFFFFF',
@@ -400,13 +490,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingRight: 8,
+    paddingRight: 4,
   },
   miniActionBtn: {
     padding: 6,
   },
   miniCardProgressTrack: {
-    width: '100%',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
     height: 2,
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
