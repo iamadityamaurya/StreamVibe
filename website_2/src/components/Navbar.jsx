@@ -19,7 +19,7 @@ export default function Navbar() {
         left: 0,
         right: 0,
         zIndex: 100,
-        padding: scrolled ? '16px 0' : '24px 0',
+        padding: scrolled ? '14px 0' : '22px 0',
         background: scrolled ? 'rgba(9, 10, 15, 0.85)' : 'transparent',
         backdropFilter: scrolled ? 'blur(16px)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(16px)' : 'none',
@@ -35,24 +35,25 @@ export default function Navbar() {
           justifyContent: 'space-between',
         }}
       >
-        {/* Brand */}
+        {/* Brand Logo - Official Red Emblem */}
         <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
           <div
             style={{
-              width: '28px',
-              height: '28px',
+              width: '30px',
+              height: '30px',
               borderRadius: '8px',
-              background: '#ffffff',
+              background: '#FF0033',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              boxShadow: '0 2px 10px rgba(255, 0, 51, 0.35)',
             }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#090a0f">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFFFFF" style={{ marginLeft: '2px' }}>
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
             </svg>
           </div>
-          <span style={{ fontSize: '1.15rem', fontWeight: '700', letterSpacing: '-0.02em', color: '#fff' }}>
+          <span style={{ fontSize: '1.2rem', fontWeight: '800', letterSpacing: '-0.02em', color: '#ffffff' }}>
             StreamVibe
           </span>
         </a>

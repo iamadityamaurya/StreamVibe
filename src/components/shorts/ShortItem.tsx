@@ -88,6 +88,7 @@ export const ShortItem = memo(
             muted={isMuted}
             isActive={isActive}
             showControls={false}
+            showCenterPlayIcon={true}
             contentFit="cover"
             style={StyleSheet.absoluteFillObject}
           />

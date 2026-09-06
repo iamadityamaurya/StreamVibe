@@ -54,6 +54,7 @@ export interface VideoPlayerProps {
   muted?: boolean;
   isActive?: boolean; // For Shorts and list lifecycle management
   showControls?: boolean;
+  showCenterPlayIcon?: boolean;
   onPlaybackStatusUpdate?: (status: Partial<PlayerState>) => void;
   onError?: (error: string) => void;
   onEnd?: () => void;

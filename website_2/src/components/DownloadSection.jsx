@@ -1,7 +1,7 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
-const DOWNLOAD_URL = 'https://website2-lyart-five.vercel.app/download';
+const DOWNLOAD_URL = 'https://streamvibe.adityamaurya.dev/download';
 const TARGET_RELEASE_URL = 'https://github.com/iamadityamaurya/bunkmait-releases/releases/tag/v1.0.2';
 
 export default function DownloadSection() {

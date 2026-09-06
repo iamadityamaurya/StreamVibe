@@ -26,6 +26,7 @@ export function VideoPlayer({
   muted = false,
   isActive = true,
   showControls = true,
+  showCenterPlayIcon = false,
   onPlaybackStatusUpdate,
   onError,
   onEnd,
@@ -386,8 +387,8 @@ export function VideoPlayer({
         </View>
       )}
 
-      {/* Center Play Icon when paused and controls hidden (Shorts tap feedback) */}
-      {!showControls && !playerState.isPlaying && !playerState.isBuffering && !playerState.error && (
+      {/* Center Play Icon when paused and explicitly requested */}
+      {showCenterPlayIcon && !playerState.isPlaying && !playerState.isBuffering && !playerState.error && (
         <View style={styles.centerOverlay} pointerEvents="none">
           <View style={styles.playPauseBtn}>
             <Ionicons name="play" size={32} color="#FFFFFF" />
