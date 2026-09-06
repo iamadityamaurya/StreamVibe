@@ -7,7 +7,7 @@ import FeaturesSection from './components/FeaturesSection';
 import TechStackSection from './components/TechStackSection';
 import Footer from './components/Footer';
 
-const TARGET_RELEASE_URL = 'https://github.com/iamadityamaurya/StreamVibe/releases/download/v1.1.1/application-0315b4ed-de81-4036-b9db-9e6d4fbafb64.apk';
+const TARGET_RELEASE_URL = 'https://github.com/iamadityamaurya/StreamVibe/releases/download/v1.1.1/application-5aaf9817-c3d7-4c34-9291-4a30d5bc00dd.apk';
 
 function App() {
   const isDownloadRoute = window.location.pathname.toLowerCase() === '/download';

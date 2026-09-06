@@ -2,7 +2,7 @@ import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
 const DOWNLOAD_URL = 'https://streamvibe.adityamaurya.dev/download';
-const TARGET_RELEASE_URL = 'https://github.com/iamadityamaurya/StreamVibe/releases/download/v1.1.1/application-0315b4ed-de81-4036-b9db-9e6d4fbafb64.apk';
+const TARGET_RELEASE_URL = 'https://github.com/iamadityamaurya/StreamVibe/releases/download/v1.1.1/application-5aaf9817-c3d7-4c34-9291-4a30d5bc00dd.apk';
 
 export default function DownloadSection() {
   return (
