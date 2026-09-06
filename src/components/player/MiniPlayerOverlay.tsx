@@ -28,7 +28,6 @@ import { MOCK_VIDEOS } from '../../data/mockVideos';
 import { formatLikes, formatViews } from '../../utils/formatters';
 
 const MINI_PLAYER_HEIGHT = 64;
-const TAB_BAR_HEIGHT = 56;
 
 export function MiniPlayerOverlay() {
   const insets = useSafeAreaInsets();
@@ -42,7 +41,8 @@ export function MiniPlayerOverlay() {
   const [progressPercent, setProgressPercent] = React.useState(0);
 
   const translateY = useSharedValue(screenHeight);
-  const snapDistance = screenHeight - MINI_PLAYER_HEIGHT - TAB_BAR_HEIGHT - Math.max(insets.bottom, 8);
+  const bottomOffset = Math.max(insets.bottom, 10);
+  const snapDistance = screenHeight - MINI_PLAYER_HEIGHT - bottomOffset;
 
   useEffect(() => {
     if (activeVideo?.id) {
