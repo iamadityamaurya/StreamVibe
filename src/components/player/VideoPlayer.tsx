@@ -40,6 +40,8 @@ export function VideoPlayer({
   const [controlsVisible, setControlsVisible] = useState(showControls);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const videoViewRef = useRef<VideoView>(null);
+  const playerStateRef = useRef(playerState);
+  playerStateRef.current = playerState;
 
   // Initialize expo-video player instance
   const player = useVideoPlayer(videoUrl, (p) => {
@@ -149,7 +151,7 @@ export function VideoPlayer({
           }
         } else if (event.status === 'error') {
           console.error('[VideoPlayer] Status error encountered for:', videoUrl, event);
-          if (!playerState.isPlaying && playerState.currentTime === 0) {
+          if (!playerStateRef.current.isPlaying && playerStateRef.current.currentTime === 0) {
             setIsBuffering(false);
             const errorMsg = 'Failed to load video stream';
             setError(errorMsg);
@@ -159,6 +161,8 @@ export function VideoPlayer({
       }),
 
       player.addListener('timeUpdate', (event) => {
+        if (isSeekingRef.current) return;
+
         const duration = player.duration || 1;
         const currentTime = event.currentTime || 0;
         const progress = currentTime / duration;
@@ -184,10 +188,16 @@ export function VideoPlayer({
       }),
     ];
 
+    try {
+      player.timeUpdateEventInterval = 0.1;
+    } catch {
+      // ignore
+    }
+
     return () => {
       subscriptions.forEach((sub) => sub?.remove?.());
     };
-  }, [player, playerState.isPlaying, playerState.currentTime, isActive, autoPlay, videoUrl, setIsPlaying, setIsBuffering, setError, setProgress, onError, onEnd, isLooping, onPlaybackStatusUpdate]);
+  }, [player, isActive, autoPlay, videoUrl, setIsPlaying, setIsBuffering, setError, setProgress, onError, onEnd, isLooping, onPlaybackStatusUpdate]);
 
   const handleTogglePlayPause = useCallback(() => {
     if (!player) return;
