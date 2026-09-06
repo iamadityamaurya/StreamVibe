@@ -46,6 +46,7 @@ export function MiniPlayerOverlay() {
 
   useEffect(() => {
     if (activeVideo?.id) {
+      setIsPlaying(true);
       scrollViewRef.current?.scrollTo({ y: 0, animated: true });
     }
   }, [activeVideo?.id]);

@@ -158,11 +158,7 @@ export default function InteractiveSimulator() {
               {activeTab === 'feed' && (
                 <div style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '12px', animation: 'fadeIn 0.35s ease-in-out' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0' }}>
-                    <div style={{ width: '22px', height: '22px', borderRadius: '6px', background: '#FF0033', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="#FFFFFF" style={{ marginLeft: '1px' }}>
-                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                      </svg>
-                    </div>
+                    <img src="/favicon.svg" alt="StreamVibe" style={{ width: '22px', height: '22px', borderRadius: '6px' }} />
                     <span style={{ fontWeight: '700', fontSize: '0.95rem', color: '#fff' }}>StreamVibe</span>
                   </div>
                   {MOCK_SIM_VIDEOS.map((vid) => (

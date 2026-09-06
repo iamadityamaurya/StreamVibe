@@ -1,4 +1,4 @@
-import logoImg from '../assets/logo.jpg';
+import React from 'react';
 
 export default function Footer() {
   return (
@@ -7,13 +7,12 @@ export default function Footer() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', fontSize: '0.85rem', color: 'var(--text-dim)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <img
-              src={logoImg}
+              src="/favicon.svg"
               alt="StreamVibe"
               style={{
                 width: '24px',
                 height: '24px',
                 borderRadius: '6px',
-                objectFit: 'cover',
               }}
             />
             <span style={{ fontWeight: '700', color: '#fff' }}>StreamVibe</span>

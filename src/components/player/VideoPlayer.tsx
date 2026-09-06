@@ -52,8 +52,14 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
   const [controlsVisible, setControlsVisible] = useState(showControls);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const videoViewRef = useRef<VideoView>(null);
+  const userPausedRef = useRef(false);
   const playerStateRef = useRef(playerState);
   playerStateRef.current = playerState;
+
+  // Reset userPausedRef when videoUrl changes
+  useEffect(() => {
+    userPausedRef.current = false;
+  }, [videoUrl]);
 
   // Initialize expo-video player instance
   const player = useVideoPlayer(videoUrl, (p) => {
@@ -67,7 +73,7 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
     let isSubscribed = true;
     const playVideo = () => {
-      if (isSubscribed && isActive && autoPlay) {
+      if (isSubscribed && isActive && autoPlay && !userPausedRef.current) {
         try {
           player.play();
         } catch (e) {
@@ -114,7 +120,7 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
     if (!player) return;
 
     if (isActive) {
-      if (autoPlay) {
+      if (autoPlay && !userPausedRef.current) {
         try {
           player.play();
         } catch (err) {
@@ -154,7 +160,7 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
         } else if (event.status === 'readyToPlay') {
           setIsBuffering(false);
           setError(null);
-          if (isActive && autoPlay) {
+          if (isActive && autoPlay && !userPausedRef.current) {
             try {
               player.play();
             } catch (err) {
@@ -216,47 +222,56 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
     setError(null);
     const isCurrentlyPlaying = player.playing ?? playerStateRef.current.isPlaying;
+    const nextState = !isCurrentlyPlaying;
+
     if (isCurrentlyPlaying) {
+      userPausedRef.current = true;
       try {
         player.pause();
-        setIsPlaying(false);
       } catch (e) {
         console.warn('User pause error:', e);
       }
     } else {
+      userPausedRef.current = false;
       try {
         player.play();
-        setIsPlaying(true);
       } catch (e) {
         console.warn('User play error:', e);
       }
     }
-  }, [player, setError, setIsPlaying]);
+
+    setIsPlaying(nextState);
+    onPlaybackStatusUpdate?.({ isPlaying: nextState });
+  }, [player, setError, setIsPlaying, onPlaybackStatusUpdate]);
 
   React.useImperativeHandle(
     ref,
     () => ({
       play: () => {
         if (!player) return;
+        userPausedRef.current = false;
         try {
           player.play();
           setIsPlaying(true);
+          onPlaybackStatusUpdate?.({ isPlaying: true });
         } catch (e) {
           console.warn('Imperative play error:', e);
         }
       },
       pause: () => {
         if (!player) return;
+        userPausedRef.current = true;
         try {
           player.pause();
           setIsPlaying(false);
+          onPlaybackStatusUpdate?.({ isPlaying: false });
         } catch (e) {
           console.warn('Imperative pause error:', e);
         }
       },
       togglePlayPause: handleTogglePlayPause,
     }),
-    [player, handleTogglePlayPause, setIsPlaying]
+    [player, handleTogglePlayPause, setIsPlaying, onPlaybackStatusUpdate]
   );
 
   const handleToggleMute = useCallback(() => {
@@ -426,11 +441,11 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
         </View>
       )}
 
-      {/* Center Play Icon when paused and explicitly requested */}
+      {/* Center Play Icon in Vertical View (stays visible as long as video is paused) */}
       {showCenterPlayIcon && !playerState.isPlaying && !playerState.isBuffering && !playerState.error && (
         <View style={styles.centerOverlay} pointerEvents="none">
           <View style={styles.playPauseBtn}>
-            <Ionicons name="play" size={32} color="#FFFFFF" />
+            <Ionicons name="play" size={34} color="#FFFFFF" />
           </View>
         </View>
       )}
