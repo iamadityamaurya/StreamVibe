@@ -1,13 +1,23 @@
 import { Image } from 'react-native';
 import { Short } from '../types/video';
 
+const getAssetUri = (asset: any): string => {
+  if (typeof Image.resolveAssetSource === 'function') {
+    const resolved = Image.resolveAssetSource(asset);
+    if (resolved?.uri) return resolved.uri;
+  }
+  if (typeof asset === 'string') return asset;
+  if (asset && typeof asset === 'object' && 'default' in asset) return (asset as any).default;
+  return asset;
+};
+
 export const MOCK_SHORTS: Short[] = [
   {
     id: 'short-1',
     title: 'Mind-blowing CSS animation tricks you need to try 🔥',
     creatorName: 'CodeWithAlex',
     creatorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    thumbnailUrl: Image.resolveAssetSource(require('../../assets/thumbnails/short-1.jpg')).uri,
+    thumbnailUrl: getAssetUri(require('../../assets/thumbnails/short-1.jpg')),
     videoUrl: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
     duration: 10,
     likes: 142000,
@@ -20,7 +30,7 @@ export const MOCK_SHORTS: Short[] = [
     title: 'Humpback Whale breaching underwater in 4K Slow Motion 🐋',
     creatorName: 'DeepOceanVibes',
     creatorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    thumbnailUrl: Image.resolveAssetSource(require('../../assets/thumbnails/short-2.jpg')).uri,
+    thumbnailUrl: getAssetUri(require('../../assets/thumbnails/short-2.jpg')),
     videoUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
     duration: 46,
     likes: 389000,
@@ -33,7 +43,7 @@ export const MOCK_SHORTS: Short[] = [
     title: 'Sintel Fantasy Dragon Flight Scene [4K Remaster] 🐉',
     creatorName: 'AnimationGuild',
     creatorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    thumbnailUrl: Image.resolveAssetSource(require('../../assets/thumbnails/short-3.jpg')).uri,
+    thumbnailUrl: getAssetUri(require('../../assets/thumbnails/short-3.jpg')),
     videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
     duration: 52,
     likes: 512000,
@@ -46,7 +56,7 @@ export const MOCK_SHORTS: Short[] = [
     title: 'Big Buck Bunny Forest Revenge Clip 🐰',
     creatorName: 'PeachOpenStudio',
     creatorAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    thumbnailUrl: Image.resolveAssetSource(require('../../assets/thumbnails/short-4.jpg')).uri,
+    thumbnailUrl: getAssetUri(require('../../assets/thumbnails/short-4.jpg')),
     videoUrl: 'https://media.w3.org/2010/05/bunny/trailer.mp4',
     duration: 33,
     likes: 870000,
@@ -59,7 +69,7 @@ export const MOCK_SHORTS: Short[] = [
     title: 'Extreme Downhill Bike Canyon Drop [Helmet Cam] 🚵‍♂️',
     creatorName: 'ApexVelocity',
     creatorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-    thumbnailUrl: Image.resolveAssetSource(require('../../assets/thumbnails/short-5.jpg')).uri,
+    thumbnailUrl: getAssetUri(require('../../assets/thumbnails/short-5.jpg')),
     videoUrl: 'https://media.w3.org/2010/05/bunny/movie.mp4',
     duration: 63,
     likes: 215000,
@@ -72,7 +82,7 @@ export const MOCK_SHORTS: Short[] = [
     title: 'Macro Time-Lapse: Desert Cactus Flower Opening 🌸',
     creatorName: 'BotanicalShorts',
     creatorAvatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80',
-    thumbnailUrl: Image.resolveAssetSource(require('../../assets/thumbnails/short-6.jpg')).uri,
+    thumbnailUrl: getAssetUri(require('../../assets/thumbnails/short-6.jpg')),
     videoUrl: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
     duration: 10,
     likes: 640000,
@@ -85,7 +95,7 @@ export const MOCK_SHORTS: Short[] = [
     title: 'Cyberpunk Metropolis Unreal Engine Lighting Pass 🌃',
     creatorName: 'CGI_Vault',
     creatorAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
-    thumbnailUrl: Image.resolveAssetSource(require('../../assets/thumbnails/short-7.jpg')).uri,
+    thumbnailUrl: getAssetUri(require('../../assets/thumbnails/short-7.jpg')),
     videoUrl: 'https://vjs.zencdn.net/v/oceans.mp4',
     duration: 46,
     likes: 920000,
@@ -98,7 +108,7 @@ export const MOCK_SHORTS: Short[] = [
     title: 'Top 3 Developer Productivity Shortcuts in VSCode ⚡',
     creatorName: 'DevTipsWeekly',
     creatorAvatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80',
-    thumbnailUrl: Image.resolveAssetSource(require('../../assets/thumbnails/short-8.jpg')).uri,
+    thumbnailUrl: getAssetUri(require('../../assets/thumbnails/short-8.jpg')),
     videoUrl: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
     duration: 52,
     likes: 310000,

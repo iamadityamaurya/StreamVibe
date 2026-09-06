@@ -170,7 +170,7 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
             }
           }
         } else if (event.status === 'error') {
-          console.error('[VideoPlayer] Status error encountered for:', videoUrl, event);
+          console.warn('[VideoPlayer] Stream status error:', videoUrl, event);
           if (!playerStateRef.current.isPlaying && playerStateRef.current.currentTime === 0) {
             setIsBuffering(false);
             const errorMsg = 'Failed to load video stream';
@@ -183,21 +183,25 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
       player.addListener('timeUpdate', (event) => {
         if (isSeekingRef.current) return;
 
-        const duration = player.duration || 1;
-        const currentTime = event.currentTime || 0;
-        const progress = currentTime / duration;
+        try {
+          const duration = player.duration || 1;
+          const currentTime = event.currentTime || 0;
+          const progress = currentTime / duration;
 
-        if (currentTime > 0) {
-          setIsBuffering(false);
-          setError(null);
+          if (currentTime > 0) {
+            setIsBuffering(false);
+            setError(null);
+          }
+
+          setProgress(progress, currentTime, duration);
+          onPlaybackStatusUpdate?.({
+            progress,
+            currentTime,
+            duration,
+          });
+        } catch {
+          // ignore released player
         }
-
-        setProgress(progress, currentTime, duration);
-        onPlaybackStatusUpdate?.({
-          progress,
-          currentTime,
-          duration,
-        });
       }),
 
       player.addListener('playToEnd', () => {
@@ -252,7 +256,14 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
     }
 
     setError(null);
-    const isCurrentlyPlaying = player.playing ?? playerStateRef.current.isPlaying;
+    let isCurrentlyPlaying = playerStateRef.current.isPlaying;
+    try {
+      if (typeof player.playing === 'boolean') {
+        isCurrentlyPlaying = player.playing;
+      }
+    } catch {
+      // ignore
+    }
     const nextState = !isCurrentlyPlaying;
 
     if (isCurrentlyPlaying) {
@@ -309,9 +320,13 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
     if (globalPlayer) {
       globalPlayer.toggleGlobalMute();
     } else if (player) {
-      const newMutedState = !player.muted;
-      player.muted = newMutedState;
-      setIsMuted(newMutedState);
+      try {
+        const newMutedState = !player.muted;
+        player.muted = newMutedState;
+        setIsMuted(newMutedState);
+      } catch (e) {
+        console.warn('Mute toggle error:', e);
+      }
     }
   }, [globalPlayer, player, setIsMuted]);
 
@@ -341,23 +356,19 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
       const width = progressBarWidthRef.current;
       if (!player || width <= 0) return;
 
-      const duration = player.duration || 1;
-      const offsetX = progressBarPageXRef.current;
-      const touchX = pageX - offsetX;
-      const clampedX = Math.max(0, Math.min(touchX, width));
-      const seekPercent = clampedX / width;
-      const targetTime = seekPercent * duration;
-
       try {
+        const duration = player.duration || 1;
+        const offsetX = progressBarPageXRef.current;
+        const touchX = pageX - offsetX;
+        const clampedX = Math.max(0, Math.min(touchX, width));
+        const seekPercent = clampedX / width;
+        const targetTime = seekPercent * duration;
+
         player.currentTime = targetTime;
-      } catch {
-        try {
-          player.seekBy(targetTime - (player.currentTime || 0));
-        } catch (err) {
-          console.warn('[VideoPlayer] Seek error:', err);
-        }
+        setProgress(seekPercent, targetTime, duration);
+      } catch (err) {
+        console.warn('[VideoPlayer] Seek error (player released):', err);
       }
-      setProgress(seekPercent, targetTime, duration);
     },
     [player, setProgress]
   );
