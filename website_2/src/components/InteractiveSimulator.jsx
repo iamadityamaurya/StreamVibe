@@ -108,11 +108,8 @@ export default function InteractiveSimulator() {
 
         {/* Simulator Grid */}
         <div
+          className="responsive-sim-split"
           style={{
-            display: 'grid',
-            gridTemplateColumns: '340px 1fr',
-            gap: '40px',
-            alignItems: 'center',
             maxWidth: '900px',
             margin: '0 auto',
           }}
@@ -121,8 +118,9 @@ export default function InteractiveSimulator() {
           <div
             style={{
               width: '100%',
-              height: '600px',
-              borderRadius: '36px',
+              maxWidth: '320px',
+              height: '560px',
+              borderRadius: '32px',
               background: '#090a0f',
               border: '6px solid #1c1d24',
               boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)',

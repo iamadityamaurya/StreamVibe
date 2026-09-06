@@ -9,15 +9,11 @@ export default function DownloadSection() {
     <section id="download" style={{ padding: '80px 0', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
       <div className="container">
         <div
-          className="card-minimal"
+          className="card-minimal responsive-grid-split"
           style={{
             maxWidth: '800px',
             margin: '0 auto',
             padding: '40px',
-            display: 'grid',
-            gridTemplateColumns: '220px 1fr',
-            gap: '40px',
-            alignItems: 'center',
           }}
         >
           {/* QR Code Container */}
@@ -32,7 +28,7 @@ export default function DownloadSection() {
             >
               <QRCodeSVG
                 value={DOWNLOAD_URL}
-                size={180}
+                size={160}
                 bgColor="#FFFFFF"
                 fgColor="#090A0F"
                 level="H"
@@ -45,8 +41,8 @@ export default function DownloadSection() {
           </div>
 
           {/* Download Details */}
-          <div style={{ textAlign: 'left' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
               <span className="tag-minimal" style={{ fontSize: '0.75rem' }}>Release v1.0.2</span>
               <span style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: '500' }}>Direct APK Build</span>
             </div>

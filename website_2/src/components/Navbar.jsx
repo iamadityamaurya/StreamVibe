@@ -59,7 +59,7 @@ export default function Navbar() {
         </a>
 
         {/* Navigation */}
-        <nav style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+        <nav className="nav-links-desktop">
           <a href="#download" style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500', transition: 'color 0.2s' }} onMouseEnter={(e) => e.target.style.color = '#fff'} onMouseLeave={(e) => e.target.style.color = 'var(--text-muted)'}>
             Download
           </a>
