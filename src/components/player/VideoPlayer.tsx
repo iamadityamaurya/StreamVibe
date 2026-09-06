@@ -203,16 +203,23 @@ export function VideoPlayer({
     if (!player) return;
 
     setError(null);
-    if (playerState.isPlaying) {
-      player.pause();
+    const isCurrentlyPlaying = player.playing ?? playerStateRef.current.isPlaying;
+    if (isCurrentlyPlaying) {
+      try {
+        player.pause();
+        setIsPlaying(false);
+      } catch (e) {
+        console.warn('User pause error:', e);
+      }
     } else {
       try {
         player.play();
+        setIsPlaying(true);
       } catch (e) {
         console.warn('User play error:', e);
       }
     }
-  }, [player, playerState.isPlaying, setError]);
+  }, [player, setError, setIsPlaying]);
 
   const handleToggleMute = useCallback(() => {
     if (globalPlayer) {
@@ -337,7 +344,7 @@ export function VideoPlayer({
         player={player}
         style={styles.videoView}
         contentFit={contentFit}
-        nativeControls={false}
+        nativeControls={isFullscreen}
         fullscreenOptions={{
           enable: true,
           orientation: 'landscape',
@@ -352,6 +359,7 @@ export function VideoPlayer({
           <Image
             source={{ uri: thumbnailUrl }}
             style={styles.thumbnailOverlay}
+            contentFit="cover"
           />
         </View>
       )}
@@ -503,7 +511,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   centerOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -550,6 +557,8 @@ const styles = StyleSheet.create({
   topControls: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    marginTop : 14,
+    marginRight: 4,
   },
   controlIconBg: {
     width: 32,

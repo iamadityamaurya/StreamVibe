@@ -95,7 +95,7 @@ export const ShortItem = memo(
           <Image
             source={{ uri: short.thumbnailUrl }}
             style={StyleSheet.absoluteFillObject}
-            resizeMode="cover"
+            contentFit="cover"
           />
         )}
 
