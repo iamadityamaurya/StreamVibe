@@ -38,6 +38,8 @@ export function VideoPlayer({
   const effectiveMuted = globalPlayer ? globalPlayer.isGlobalMuted : muted;
 
   const [controlsVisible, setControlsVisible] = useState(showControls);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const videoViewRef = useRef<VideoView>(null);
 
   // Initialize expo-video player instance
   const player = useVideoPlayer(videoUrl, (p) => {
@@ -295,6 +297,19 @@ export function VideoPlayer({
     }
   }, [player, videoUrl, setError, setIsBuffering]);
 
+  const handleToggleFullscreen = useCallback(async () => {
+    if (!videoViewRef.current) return;
+    try {
+      if (isFullscreen) {
+        await videoViewRef.current.exitFullscreen();
+      } else {
+        await videoViewRef.current.enterFullscreen();
+      }
+    } catch (err) {
+      console.warn('[VideoPlayer] Fullscreen toggle error:', err);
+    }
+  }, [isFullscreen]);
+
   const toggleControls = useCallback(() => {
     if (showControls) {
       setControlsVisible((prev) => !prev);
@@ -308,11 +323,17 @@ export function VideoPlayer({
     <Pressable style={[styles.container, style]} onPress={toggleControls}>
       {/* Video Surface */}
       <VideoView
+        ref={videoViewRef}
         player={player}
         style={styles.videoView}
         contentFit={contentFit}
         nativeControls={false}
-        fullscreenOptions={{ enable: false }}
+        fullscreenOptions={{
+          enable: true,
+          orientation: 'landscape',
+        }}
+        onFullscreenEnter={() => setIsFullscreen(true)}
+        onFullscreenExit={() => setIsFullscreen(false)}
       />
 
       {/* Poster / Thumbnail when buffering initially */}
@@ -422,9 +443,26 @@ export function VideoPlayer({
               </View>
             </View>
 
-            <Text style={styles.timeText}>
-              {formatDuration(playerState.currentTime)} / {formatDuration(playerState.duration)}
-            </Text>
+            <View style={styles.timeAndFullscreenRow}>
+              <Text style={styles.timeText}>
+                {formatDuration(playerState.currentTime)} / {formatDuration(playerState.duration)}
+              </Text>
+              <TouchableOpacity
+                style={styles.fullscreenBtn}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleToggleFullscreen();
+                }}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name={isFullscreen ? 'contract' : 'expand'}
+                  size={20}
+                  color="#FFFFFF"
+                />
+              </TouchableOpacity>
+            </View>
           </Pressable>
         </Pressable>
       )}
@@ -554,5 +592,16 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: Typography.fontSize.caption,
     fontWeight: '500',
+  },
+  timeAndFullscreenRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  fullscreenBtn: {
+    padding: 4,
+    borderRadius: Radius.xs,
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
 });
