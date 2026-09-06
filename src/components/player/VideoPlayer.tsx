@@ -34,6 +34,7 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
       muted = false,
       isActive = true,
       showControls = true,
+      nativeControls,
       showCenterPlayIcon = false,
       onPlaybackStatusUpdate,
       onError,
@@ -373,6 +374,8 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
     }
   }, [showControls, handleTogglePlayPause]);
 
+  const useNative = nativeControls ?? isFullscreen;
+
   return (
     <View style={[styles.container, style]}>
       {/* Video Surface */}
@@ -381,7 +384,7 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
         player={player}
         style={styles.videoView}
         contentFit={contentFit}
-        nativeControls={isFullscreen}
+        nativeControls={useNative}
         fullscreenOptions={{
           enable: true,
           orientation: 'landscape',
@@ -390,8 +393,8 @@ export const VideoPlayer = React.forwardRef<VideoPlayerRef, VideoPlayerProps>(
         onFullscreenExit={() => setIsFullscreen(false)}
       />
 
-      {/* Touch Backdrop over Video Surface (catches taps when controls overlay is hidden) */}
-      <Pressable style={StyleSheet.absoluteFill} onPress={toggleControls} />
+      {/* Touch Backdrop over Video Surface (catches taps when custom controls overlay is hidden, bypassed when prebuilt native controls are active) */}
+      {!useNative && <Pressable style={StyleSheet.absoluteFill} onPress={toggleControls} />}
 
       {/* Poster / Thumbnail when buffering initially */}
       {thumbnailUrl && playerState.isBuffering && playerState.currentTime === 0 && (
