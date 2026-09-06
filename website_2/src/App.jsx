@@ -7,7 +7,7 @@ import FeaturesSection from './components/FeaturesSection';
 import TechStackSection from './components/TechStackSection';
 import Footer from './components/Footer';
 
-const TARGET_RELEASE_URL = 'https://github.com/iamadityamaurya/bunkmait-releases/releases/tag/v1.0.2';
+const TARGET_RELEASE_URL = 'https://github.com/iamadityamaurya/StreamVibe/releases/download/v1.1.1/application-0315b4ed-de81-4036-b9db-9e6d4fbafb64.apk';
 
 function App() {
   const isDownloadRoute = window.location.pathname.toLowerCase() === '/download';

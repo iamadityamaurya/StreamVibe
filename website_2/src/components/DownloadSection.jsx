@@ -2,7 +2,7 @@ import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
 const DOWNLOAD_URL = 'https://streamvibe.adityamaurya.dev/download';
-const TARGET_RELEASE_URL = 'https://github.com/iamadityamaurya/bunkmait-releases/releases/tag/v1.0.2';
+const TARGET_RELEASE_URL = 'https://github.com/iamadityamaurya/StreamVibe/releases/download/v1.1.1/application-0315b4ed-de81-4036-b9db-9e6d4fbafb64.apk';
 
 export default function DownloadSection() {
   return (
@@ -47,7 +47,7 @@ export default function DownloadSection() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
               <span className="tag-minimal" style={{ fontSize: '0.75rem', borderColor: 'rgba(255,0,51,0.3)', background: 'rgba(255,0,51,0.08)', color: '#FF3355' }}>
-                Release v1.0.2
+                Release v1.1.1
               </span>
               <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: '600' }}>✓ Direct APK Build</span>
             </div>
@@ -75,7 +75,7 @@ export default function DownloadSection() {
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                <span>Download APK (v1.0.2)</span>
+                <span>Download APK (v1.1.1)</span>
               </a>
 
               <a href={DOWNLOAD_URL} target="_blank" rel="noopener noreferrer" className="btn-secondary">
