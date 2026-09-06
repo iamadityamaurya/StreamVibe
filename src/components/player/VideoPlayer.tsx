@@ -337,7 +337,7 @@ export function VideoPlayer({
   }, [showControls, handleTogglePlayPause]);
 
   return (
-    <Pressable style={[styles.container, style]} onPress={toggleControls}>
+    <View style={[styles.container, style]}>
       {/* Video Surface */}
       <VideoView
         ref={videoViewRef}
@@ -352,6 +352,9 @@ export function VideoPlayer({
         onFullscreenEnter={() => setIsFullscreen(true)}
         onFullscreenExit={() => setIsFullscreen(false)}
       />
+
+      {/* Touch Backdrop over Video Surface (catches taps when controls overlay is hidden) */}
+      <Pressable style={StyleSheet.absoluteFill} onPress={toggleControls} />
 
       {/* Poster / Thumbnail when buffering initially */}
       {thumbnailUrl && playerState.isBuffering && playerState.currentTime === 0 && (
@@ -484,7 +487,7 @@ export function VideoPlayer({
           </Pressable>
         </Pressable>
       )}
-    </Pressable>
+    </View>
   );
 }
 

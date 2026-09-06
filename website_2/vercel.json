@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/download",
+      "destination": "https://github.com/iamadityamaurya/bunkmait-releases/releases/tag/v1.0.2",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
